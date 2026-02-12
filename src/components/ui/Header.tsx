@@ -14,7 +14,7 @@ export default function Header({
   userName,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 lg:ml-72">
+    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 lg:ml-72 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-primary/20 after:via-primary/5 after:to-transparent">
       <div className="flex items-center justify-between h-full px-4 lg:px-8">
         {/* Left */}
         <div className="flex items-center gap-3">

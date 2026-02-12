@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface IncomeItem {
   id: string;
@@ -60,7 +61,7 @@ export default function BranchIncomePage() {
   const total = incomes.reduce((sum, i) => sum + i.amount, 0);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span></div>;
+    return <div className="flex items-center justify-center h-64"><LoadingCar /></div>;
   }
 
   return (

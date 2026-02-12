@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 const MapPicker = dynamic(() => import("@/components/ui/MapPicker"), { ssr: false });
 

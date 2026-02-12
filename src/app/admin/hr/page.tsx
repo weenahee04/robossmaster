@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface Employee {
   id: string;
@@ -76,7 +77,7 @@ export default function AdminHRPage() {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span>
+        <LoadingCar />
       </div>
     );
   }

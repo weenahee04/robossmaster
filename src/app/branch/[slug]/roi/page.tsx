@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface ROIData {
   initialInvestment: number;
@@ -44,7 +45,7 @@ export default function BranchROIPage() {
   }, [session]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span></div>;
+    return <div className="flex items-center justify-center h-64"><LoadingCar /></div>;
   }
 
   if (!data) return null;

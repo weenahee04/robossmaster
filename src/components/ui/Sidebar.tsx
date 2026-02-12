@@ -52,7 +52,7 @@ export default function Sidebar({
       >
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 h-16 border-b border-slate-100">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center overflow-hidden">
+          <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-800 rounded-lg flex items-center justify-center overflow-hidden shadow-md shadow-primary/20">
             {logoUrl ? (
               <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
             ) : (
@@ -106,6 +106,13 @@ export default function Sidebar({
         </nav>
 
         {/* Logout */}
+        {/* Decorative wave */}
+        <div className="px-3 pb-1">
+          <svg viewBox="0 0 240 20" fill="none" className="w-full opacity-40">
+            <path d="M0,10 C40,0 80,20 120,10 C160,0 200,20 240,10" stroke="#CC0000" strokeWidth="1" fill="none" opacity="0.3" />
+            <path d="M0,14 C60,4 120,24 180,14 C210,9 230,16 240,14" stroke="#3b82f6" strokeWidth="0.5" fill="none" opacity="0.2" />
+          </svg>
+        </div>
         <div className="p-3 border-t border-slate-100">
           <button
             onClick={onLogout}

@@ -7,6 +7,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface PayrollItem {
   id: string;
@@ -98,7 +99,7 @@ export default function BranchPayrollPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span></div>;
+    return <div className="flex items-center justify-center h-64"><LoadingCar /></div>;
   }
 
   const monthNames = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];

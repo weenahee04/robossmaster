@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 import {
   BarChart,
   Bar,
@@ -44,9 +45,7 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="material-symbols-outlined animate-spin text-primary text-[32px]">
-          progress_activity
-        </span>
+        <LoadingCar />
       </div>
     );
   }
@@ -84,9 +83,20 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-slate-900">แดชบอร์ด</h1>
-        <p className="text-sm text-slate-500 mt-1">ภาพรวมระบบทั้งหมด</p>
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary-800 p-6 text-white">
+        <div className="relative z-10">
+          <h1 className="text-2xl font-black">แดชบอร์ด</h1>
+          <p className="text-sm text-white/70 mt-1">ภาพรวมระบบทั้งหมด</p>
+        </div>
+        <svg className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10" width="120" height="80" viewBox="0 0 120 80" fill="none">
+          <rect x="10" y="20" width="80" height="35" rx="8" fill="white" />
+          <rect x="22" y="8" width="48" height="18" rx="6" fill="white" />
+          <circle cx="30" cy="55" r="10" fill="white" />
+          <circle cx="70" cy="55" r="10" fill="white" />
+        </svg>
+        <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 rounded-full" />
+        <div className="absolute -right-8 -top-8 w-24 h-24 bg-white/5 rounded-full" />
       </div>
 
       {/* Stats Grid */}

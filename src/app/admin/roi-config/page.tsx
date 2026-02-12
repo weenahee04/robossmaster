@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface RoiConfigData {
   depreciationRate: number;
@@ -49,7 +50,7 @@ export default function AdminRoiConfigPage() {
   if (loading || !config) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span>
+        <LoadingCar />
       </div>
     );
   }

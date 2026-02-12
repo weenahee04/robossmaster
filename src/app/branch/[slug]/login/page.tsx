@@ -56,11 +56,30 @@ export default function BranchLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/50 via-white to-slate-50 p-4 relative overflow-hidden">
+      {/* Background bubbles */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        {[
+          { cx: "10%", cy: "20%", r: 40, dur: "6s", op: 0.06 },
+          { cx: "85%", cy: "15%", r: 30, dur: "7s", op: 0.05 },
+          { cx: "70%", cy: "75%", r: 50, dur: "8s", op: 0.04 },
+          { cx: "20%", cy: "80%", r: 35, dur: "5s", op: 0.06 },
+          { cx: "50%", cy: "50%", r: 25, dur: "9s", op: 0.03 },
+        ].map((b, i) => (
+          <circle key={i} cx={b.cx} cy={b.cy} r={b.r} fill="#3b82f6" opacity={b.op}>
+            <animate attributeName="r" values={`${b.r};${b.r + 8};${b.r}`} dur={b.dur} repeatCount="indefinite" />
+          </circle>
+        ))}
+      </svg>
+
+      {/* Decorative corner waves */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full translate-x-1/3 translate-y-1/3" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Brand */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-800 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg shadow-primary/20 animate-pulse-glow">
             {logoUrl ? (
               <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
             ) : (
@@ -71,12 +90,15 @@ export default function BranchLoginPage() {
           </div>
           <h1 className="text-2xl font-black text-slate-900">{siteBrandName}</h1>
           {branchName && (
-            <p className="text-sm text-slate-500 mt-1">{branchName}</p>
+            <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-primary-50 rounded-full">
+              <span className="material-symbols-outlined text-primary text-[14px]">store</span>
+              <p className="text-sm font-semibold text-primary">{branchName}</p>
+            </div>
           )}
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 p-6 sm:p-8">
           <h2 className="text-lg font-bold text-slate-800 mb-6">เข้าสู่ระบบสาขา</h2>
 
           <form

@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import LoadingCar from "@/components/illustrations/LoadingCar";
 
 interface InvestorData {
   totalBranches: number;
@@ -36,21 +37,31 @@ export default function InvestorDashboardPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><span className="material-symbols-outlined animate-spin text-primary text-[32px]">progress_activity</span></div>;
+    return <div className="flex items-center justify-center h-64"><LoadingCar /></div>;
   }
 
   if (!data) return null;
 
   return (
     <div className="space-y-6" ref={printRef}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900">Investor Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">ภาพรวมธุรกิจ Roboss (Read-only)</p>
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white print:hidden">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-black">Investor Dashboard</h1>
+            <p className="text-sm text-white/60 mt-1">ภาพรวมธุรกิจ Roboss (Read-only)</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" icon="print" onClick={handlePrint}>PDF Report</Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" icon="print" onClick={handlePrint}>PDF Report</Button>
-        </div>
+        <svg className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.07]" width="120" height="80" viewBox="0 0 120 80" fill="none">
+          <polyline points="10,60 30,45 50,55 70,30 90,20 110,25" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M10,60 L30,45 L50,55 L70,30 L90,20 L110,25 L110,70 L10,70 Z" fill="white" opacity="0.3" />
+          <circle cx="100" cy="10" r="8" fill="white" opacity="0.5" />
+          <text x="100" y="14" textAnchor="middle" fill="white" fontSize="10" fontWeight="800">฿</text>
+        </svg>
+        <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-white/5 rounded-full" />
       </div>
 
       {/* KPI Cards */}
