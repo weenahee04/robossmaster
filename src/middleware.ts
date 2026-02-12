@@ -18,10 +18,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // NextAuth v5 uses "authjs.session-token" cookie name (with __Secure- prefix on HTTPS)
-  const isSecure = req.nextUrl.protocol === "https:";
-  const cookieName = isSecure ? "__Secure-authjs.session-token" : "authjs.session-token";
-  const token = await getToken({ req, secret, cookieName });
+  // NextAuth v5 uses __Secure- prefix on HTTPS
+  const secureCookie = req.nextUrl.protocol === "https:";
+  const token = await getToken({ req, secret, secureCookie });
   const role = token?.role as string | undefined;
   const branchSlug = token?.branchSlug as string | undefined;
 
