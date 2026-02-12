@@ -33,21 +33,32 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      // Get CSRF token first
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
+
+      // Call credentials callback directly
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          csrfToken,
+          email,
+          password,
+          callbackUrl: "/admin/dashboard",
+        }),
+        redirect: "manual",
       });
 
-      if (result?.error) {
-        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      } else if (result?.ok) {
-        router.push("/admin/dashboard");
-        router.refresh();
-      } else {
-        setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
+      // NextAuth returns a redirect on success
+      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
+        window.location.href = "/admin/dashboard";
+        return;
       }
-    } catch {
+
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    } catch (err: any) {
+      console.error("signIn error:", err);
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);

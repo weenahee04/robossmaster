@@ -18,19 +18,33 @@ export default function InvestorLoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
 
-    if (result?.error) {
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          csrfToken,
+          email,
+          password,
+          callbackUrl: "/investor/dashboard",
+        }),
+        redirect: "manual",
+      });
+
+      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
+        window.location.href = "/investor/dashboard";
+        return;
+      }
+
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    } catch {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/investor/dashboard");
   };
 
   return (

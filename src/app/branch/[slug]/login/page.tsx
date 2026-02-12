@@ -42,18 +42,27 @@ export default function BranchLoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
+
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          csrfToken,
+          email,
+          password,
+          callbackUrl: `/branch/${slug}/dashboard`,
+        }),
+        redirect: "manual",
       });
 
-      if (result?.error) {
-        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      } else {
-        router.push(`/branch/${slug}/dashboard`);
-        router.refresh();
+      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
+        window.location.href = `/branch/${slug}/dashboard`;
+        return;
       }
+
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
     } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
