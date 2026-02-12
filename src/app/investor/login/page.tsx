@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -11,40 +9,29 @@ export default function InvestorLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [csrfToken, setCsrfToken] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    fetch("/api/auth/csrf")
+      .then((res) => res.json())
+      .then((data) => setCsrfToken(data.csrfToken))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!csrfToken) return;
     setError("");
     setLoading(true);
-
-    try {
-      const csrfRes = await fetch("/api/auth/csrf");
-      const { csrfToken } = await csrfRes.json();
-
-      const res = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          csrfToken,
-          email,
-          password,
-          callbackUrl: "/investor/dashboard",
-        }),
-        redirect: "manual",
-      });
-
-      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
-        window.location.href = "/investor/dashboard";
-        return;
-      }
-
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-    } catch {
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setLoading(false);
-    }
+    formRef.current?.submit();
   };
 
   return (
@@ -56,9 +43,11 @@ export default function InvestorLoginPage() {
         </div>
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-xl font-bold text-slate-800 mb-6">เข้าสู่ระบบนักลงทุน</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input label="อีเมล" type="email" icon="mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <Input label="รหัสผ่าน" type="password" icon="lock" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <form ref={formRef} method="POST" action="/api/auth/callback/credentials" onSubmit={handleSubmit} className="space-y-4">
+            <input type="hidden" name="csrfToken" value={csrfToken} />
+            <input type="hidden" name="callbackUrl" value="/investor/dashboard" />
+            <Input label="อีเมล" type="email" icon="mail" name="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input label="รหัสผ่าน" type="password" icon="lock" name="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             {error && (
               <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
                 <span className="material-symbols-outlined text-red-500 text-[18px]">error</span>

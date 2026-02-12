@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
 export default function BranchLoginPage() {
-  const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
   const [email, setEmail] = useState("");
@@ -17,6 +15,8 @@ export default function BranchLoginPage() {
   const [branchName, setBranchName] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [siteBrandName, setSiteBrandName] = useState("Roboss");
+  const [csrfToken, setCsrfToken] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetch(`/api/branches/${slug}`)
@@ -34,40 +34,25 @@ export default function BranchLoginPage() {
         }
       })
       .catch(console.error);
+    fetch("/api/auth/csrf")
+      .then((res) => res.json())
+      .then((data) => setCsrfToken(data.csrfToken))
+      .catch(console.error);
   }, [slug]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!csrfToken) return;
     setError("");
     setIsLoading(true);
-
-    try {
-      const csrfRes = await fetch("/api/auth/csrf");
-      const { csrfToken } = await csrfRes.json();
-
-      const res = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          csrfToken,
-          email,
-          password,
-          callbackUrl: `/branch/${slug}/dashboard`,
-        }),
-        redirect: "manual",
-      });
-
-      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
-        window.location.href = `/branch/${slug}/dashboard`;
-        return;
-      }
-
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-    } catch {
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsLoading(false);
-    }
+    formRef.current?.submit();
   };
 
   return (
@@ -94,7 +79,15 @@ export default function BranchLoginPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-lg font-bold text-slate-800 mb-6">เข้าสู่ระบบสาขา</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            ref={formRef}
+            method="POST"
+            action="/api/auth/callback/credentials"
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
+            <input type="hidden" name="csrfToken" value={csrfToken} />
+            <input type="hidden" name="callbackUrl" value={`/branch/${slug}/dashboard`} />
             <Input
               label="อีเมล"
               type="email"
@@ -102,6 +95,7 @@ export default function BranchLoginPage() {
               placeholder="branch@roboss.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              name="email"
               required
             />
             <Input
@@ -111,6 +105,7 @@ export default function BranchLoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              name="password"
               required
             />
 

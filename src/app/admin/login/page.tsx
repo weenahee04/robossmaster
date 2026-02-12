@@ -1,19 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [brandName, setBrandName] = useState("Roboss");
+  const [csrfToken, setCsrfToken] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetch("/api/site-config")
@@ -25,44 +24,28 @@ export default function AdminLoginPage() {
         }
       })
       .catch(console.error);
+    // Fetch CSRF token
+    fetch("/api/auth/csrf")
+      .then((res) => res.json())
+      .then((data) => setCsrfToken(data.csrfToken))
+      .catch(console.error);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Check URL for error param (NextAuth redirects back with ?error=)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!csrfToken) return;
     setError("");
     setIsLoading(true);
-
-    try {
-      // Get CSRF token first
-      const csrfRes = await fetch("/api/auth/csrf");
-      const { csrfToken } = await csrfRes.json();
-
-      // Call credentials callback directly
-      const res = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          csrfToken,
-          email,
-          password,
-          callbackUrl: "/admin/dashboard",
-        }),
-        redirect: "manual",
-      });
-
-      // NextAuth returns a redirect on success
-      if (res.type === "opaqueredirect" || res.status === 302 || res.status === 200) {
-        window.location.href = "/admin/dashboard";
-        return;
-      }
-
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-    } catch (err: any) {
-      console.error("signIn error:", err);
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsLoading(false);
-    }
+    // Submit as native form POST — browser handles cookies + redirect
+    formRef.current?.submit();
   };
 
   return (
@@ -87,7 +70,15 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
           <h2 className="text-lg font-bold text-slate-800 mb-6">เข้าสู่ระบบ Admin</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            ref={formRef}
+            method="POST"
+            action="/api/auth/callback/credentials"
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
+            <input type="hidden" name="csrfToken" value={csrfToken} />
+            <input type="hidden" name="callbackUrl" value="/admin/dashboard" />
             <Input
               label="อีเมล"
               type="email"
@@ -95,6 +86,7 @@ export default function AdminLoginPage() {
               placeholder="admin@roboss.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              name="email"
               required
             />
             <Input
@@ -104,6 +96,7 @@ export default function AdminLoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              name="password"
               required
             />
 
