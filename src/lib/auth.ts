@@ -74,5 +74,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
   secret: secret || "roboss-dev-secret-DO-NOT-USE-IN-PRODUCTION",
 });

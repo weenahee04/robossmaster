@@ -41,9 +41,11 @@ export default function AdminLoginPage() {
 
       if (result?.error) {
         setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      } else {
+      } else if (result?.ok) {
         router.push("/admin/dashboard");
         router.refresh();
+      } else {
+        setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
       }
     } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
