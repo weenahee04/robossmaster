@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const secret = process.env.NEXTAUTH_SECRET || "roboss-dev-secret-DO-NOT-USE-IN-PRODUCTION";
+const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "roboss-dev-secret-DO-NOT-USE-IN-PRODUCTION";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -11,13 +11,17 @@ export async function middleware(req: NextRequest) {
   if (
     pathname === "/" ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/debug") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon")
   ) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret });
+  // NextAuth v5 uses "authjs.session-token" cookie name (with __Secure- prefix on HTTPS)
+  const isSecure = req.nextUrl.protocol === "https:";
+  const cookieName = isSecure ? "__Secure-authjs.session-token" : "authjs.session-token";
+  const token = await getToken({ req, secret, cookieName });
   const role = token?.role as string | undefined;
   const branchSlug = token?.branchSlug as string | undefined;
 
