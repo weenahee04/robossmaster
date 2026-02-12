@@ -1,0 +1,356 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ===== Users & Auth =====
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String   @default("BRANCH_ADMIN") // SUPER_ADMIN | BRANCH_ADMIN | INVESTOR
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  incomes       Income[]
+  expenses      Expense[]
+  leaveApprovals LeaveRequest[] @relation("ApprovedBy")
+  washRecords    WashRecord[]
+  ticketComments TicketComment[]
+  sopDocuments   SopDocument[]
+  manuals        MachineManual[]
+}
+
+// ===== Branch =====
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  code      String?
+  address   String?
+  latitude  Float?
+  longitude Float?
+  phone     String?
+  email     String?
+  isActive         Boolean  @default(true)
+  initialInvestment Float?
+  openDate         DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  users              User[]
+  bankAccount        BankAccount?
+  incomes            Income[]
+  expenses           Expense[]
+  employees          Employee[]
+  attendances        Attendance[]
+  payrolls           Payroll[]
+  leaveRequests      LeaveRequest[]
+  washPackages       WashPackage[]
+  washRecords        WashRecord[]
+  notifications      Notification[]
+  serviceTickets     ServiceTicket[]
+  maintenanceSchedules MaintenanceSchedule[]
+}
+
+// ===== Bank Account =====
+
+model BankAccount {
+  id            String @id @default(cuid())
+  branchId      String @unique
+  branch        Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  bankName      String
+  bankBranch    String?
+  accountName   String
+  accountNumber String
+  promptPay     String?
+}
+
+// ===== Finance =====
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  type     String    // INCOME | EXPENSE
+  incomes  Income[]
+  expenses Expense[]
+}
+
+model Income {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  amount      Float
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  description String?  @db.Text
+  date        DateTime
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  amount      Float
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  description String?  @db.Text
+  date        DateTime
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+// ===== HR Management =====
+
+model Employee {
+  id           String   @id @default(cuid())
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name         String
+  position     String?
+  phone        String?
+  email        String?
+  salary       Float    @default(0)
+  profileImage String?
+  startDate    DateTime?
+  status       String   @default("ACTIVE") // ACTIVE | RESIGNED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  attendances   Attendance[]
+  payrolls      Payroll[]
+  leaveRequests LeaveRequest[]
+}
+
+model Attendance {
+  id            String   @id @default(cuid())
+  employeeId    String
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branchId      String
+  branch        Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  date          DateTime
+  checkIn       DateTime?
+  checkOut      DateTime?
+  status        String   @default("PRESENT") // PRESENT | LATE | ABSENT
+  hoursWorked   Float?
+  overtimeHours Float?
+  createdAt     DateTime @default(now())
+}
+
+model Payroll {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  baseSalary  Float
+  overtimePay Float    @default(0)
+  deductions  Float    @default(0)
+  totalPay    Float
+  paidAt      DateTime?
+  status      String   @default("PENDING") // PENDING | PAID
+  createdAt   DateTime @default(now())
+}
+
+model LeaveRequest {
+  id           String   @id @default(cuid())
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  type         String   // SICK | PERSONAL | VACATION
+  startDate    DateTime
+  endDate      DateTime
+  reason       String?
+  status       String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  approvedById String?
+  approvedBy   User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+// ===== Wash Tracking =====
+
+model WashPackage {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name      String
+  type      String   // CAR | BIKE | HELMET
+  price     Float
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  washRecords WashRecord[]
+}
+
+model WashRecord {
+  id              String             @id @default(cuid())
+  branchId        String
+  branch          Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  packageId       String?
+  package         WashPackage?       @relation(fields: [packageId], references: [id])
+  globalPackageId String?
+  globalPackage   GlobalWashPackage? @relation(fields: [globalPackageId], references: [id])
+  vehicleType     String             // CAR | BIKE | HELMET
+  packageName     String?            // denormalized package name for display
+  amount          Float
+  note            String?
+  createdById     String?
+  createdBy       User?              @relation(fields: [createdById], references: [id])
+  date            DateTime           @default(now())
+  createdAt       DateTime           @default(now())
+}
+
+// ===== Notifications =====
+
+model Notification {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  type      String   // INCOME_DROP | MACHINE_DOWN | EXPENSE_HIGH | ABSENT_FREQUENT
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  data      String?  @db.Text // JSON string for extra data
+  createdAt DateTime @default(now())
+}
+
+// ===== Service Tickets =====
+
+model ServiceTicket {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  title       String
+  description String   @db.Text
+  category    String   // MACHINE_ERROR | WATER_ISSUE | ELECTRICAL | NOISE | OTHER
+  priority    String   @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
+  status      String   @default("NEW") // NEW | IN_PROGRESS | FIXED | CLOSED
+  images      String?  @db.Text // JSON array of base64 strings
+  machineModel String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  comments TicketComment[]
+}
+
+model TicketComment {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    ServiceTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  message   String   @db.Text
+  createdAt DateTime      @default(now())
+}
+
+// ===== ROI Config =====
+
+model RoiConfig {
+  id                  String   @id @default(cuid())
+  depreciationRate    Float    @default(10)    // ค่าเสื่อมราคา %/ปี
+  adminFeePercent     Float    @default(5)     // ค่าบริหาร %
+  targetRoiPercent    Float    @default(25)    // เป้า ROI %/ปี
+  targetPaybackMonths Int      @default(24)    // เป้าคืนทุน (เดือน)
+  includePayrollInCost Boolean @default(true)  // รวมเงินเดือนในต้นทุน?
+  updatedAt           DateTime @updatedAt
+}
+
+// ===== Global Wash Packages =====
+
+model GlobalWashPackage {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // CAR | BIKE | HELMET
+  price     Float
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  washRecords WashRecord[]
+}
+
+// ===== SOP & Manuals =====
+
+model SopDocument {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   // STAFF | WASH_CAR | WASH_BIKE | OPEN_CLOSE | SAFETY | TROUBLESHOOT
+  content     String   @db.Text // Markdown content
+  videoUrl    String?  // YouTube embed URL
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MachineManual {
+  id           String   @id @default(cuid())
+  title        String
+  machineModel String
+  content      String   @db.Text // Markdown content
+  videoUrl     String?  // YouTube embed URL
+  checklist    String?  @db.Text // JSON array of checklist items
+  createdById  String?
+  createdBy    User?    @relation(fields: [createdById], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  maintenanceSchedules MaintenanceSchedule[]
+}
+
+// ===== Site Config & Banners =====
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  logoUrl   String?  @db.Text // base64 data URL or external URL
+  brandName String   @default("Roboss")
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String   @db.Text // base64 data URL or external URL
+  linkUrl   String?  // optional click-through URL
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MaintenanceSchedule {
+  id          String        @id @default(cuid())
+  branchId    String
+  branch      Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  manualId    String
+  manual      MachineManual @relation(fields: [manualId], references: [id])
+  taskName    String
+  frequency   String        // DAILY | WEEKLY | MONTHLY | QUARTERLY | YEARLY
+  lastDoneAt  DateTime?
+  nextDueAt   DateTime?
+  status      String        @default("PENDING") // PENDING | DONE | OVERDUE
+  createdAt   DateTime      @default(now())
+}
