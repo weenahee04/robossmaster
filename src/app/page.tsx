@@ -1,6 +1,4 @@
 import Link from "next/link";
-import CarWashHero from "@/components/illustrations/CarWashHero";
-import RobossLogo from "@/components/illustrations/RobossLogo";
 import { WaveBottom } from "@/components/illustrations/WaveDecoration";
 import WaterBubbles from "@/components/illustrations/WaterBubbles";
 
@@ -13,8 +11,8 @@ export default function Home() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 pt-12">
         {/* Logo */}
         <div className="animate-float mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-800 rounded-2xl flex items-center justify-center shadow-xl shadow-primary/20 animate-pulse-glow">
-            <RobossLogo size={52} />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl shadow-primary/20 animate-pulse-glow">
+            <img src="/roboss-logo.png" alt="Roboss" className="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -29,8 +27,8 @@ export default function Home() {
         </p>
 
         {/* Hero Illustration */}
-        <div className="w-full max-w-md mb-10 animate-float-slow">
-          <CarWashHero className="w-full h-auto drop-shadow-lg" />
+        <div className="w-full max-w-xs mb-10 animate-float-slow">
+          <img src="/roboss-logo.png" alt="Roboss" className="w-full h-auto drop-shadow-2xl rounded-full" />
         </div>
 
         {/* CTA Buttons */}
@@ -63,12 +61,7 @@ export default function Home() {
             {/* Feature 1 */}
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
               <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                  <rect x="4" y="10" width="20" height="14" rx="3" fill="#CC0000" opacity="0.2" />
-                  <rect x="8" y="4" width="12" height="8" rx="2" fill="#CC0000" opacity="0.35" />
-                  <circle cx="9" cy="24" r="2.5" fill="#CC0000" opacity="0.4" />
-                  <circle cx="19" cy="24" r="2.5" fill="#CC0000" opacity="0.4" />
-                </svg>
+                <span className="material-symbols-outlined text-primary text-[24px]">store</span>
               </div>
               <h3 className="font-bold text-slate-800 mb-2">จัดการแฟรนไชส์</h3>
               <p className="text-sm text-slate-500 leading-relaxed">ดูแลทุกสาขาจากที่เดียว ติดตามรายรับ-รายจ่าย พนักงาน และ ROI แบบ Real-time</p>

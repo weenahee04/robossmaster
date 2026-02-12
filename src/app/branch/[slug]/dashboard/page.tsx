@@ -84,14 +84,7 @@ export default function BranchDashboardPage() {
           <h1 className="text-2xl font-black">แดชบอร์ด</h1>
           <p className="text-sm text-white/70 mt-1">ภาพรวมสาขา {session?.user?.branchName}</p>
         </div>
-        <svg className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10" width="100" height="70" viewBox="0 0 100 70" fill="none">
-          <rect x="5" y="15" width="70" height="30" rx="6" fill="white" />
-          <rect x="15" y="5" width="40" height="15" rx="5" fill="white" />
-          <circle cx="22" cy="48" r="8" fill="white" />
-          <circle cx="58" cy="48" r="8" fill="white" />
-          <ellipse cx="85" cy="20" rx="4" ry="6" fill="white" opacity="0.6" />
-          <ellipse cx="92" cy="28" rx="3" ry="4" fill="white" opacity="0.4" />
-        </svg>
+        <img src="/roboss-logo.png" alt="Roboss" className="absolute right-4 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full opacity-20" />
         <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-white/5 rounded-full" />
         <div className="absolute -right-8 -top-8 w-20 h-20 bg-white/5 rounded-full" />
       </div>

@@ -55,12 +55,7 @@ export default function InvestorDashboardPage() {
             <Button variant="outline" icon="print" onClick={handlePrint}>PDF Report</Button>
           </div>
         </div>
-        <svg className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.07]" width="120" height="80" viewBox="0 0 120 80" fill="none">
-          <polyline points="10,60 30,45 50,55 70,30 90,20 110,25" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M10,60 L30,45 L50,55 L70,30 L90,20 L110,25 L110,70 L10,70 Z" fill="white" opacity="0.3" />
-          <circle cx="100" cy="10" r="8" fill="white" opacity="0.5" />
-          <text x="100" y="14" textAnchor="middle" fill="white" fontSize="10" fontWeight="800">฿</text>
-        </svg>
+        <img src="/roboss-logo.png" alt="Roboss" className="absolute right-8 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full opacity-[0.15]" />
         <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-white/5 rounded-full" />
       </div>
 

@@ -46,27 +46,8 @@ export default function InvestorLoginPage() {
       <div className="w-full max-w-4xl flex flex-col lg:flex-row items-center gap-8 lg:gap-16 relative z-10">
         {/* Left: Chart illustration (hidden on mobile) */}
         <div className="hidden lg:flex flex-col items-center flex-1">
-          <div className="w-full max-w-sm animate-float-slow">
-            <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-              <rect x="40" y="30" width="320" height="240" rx="16" fill="white" opacity="0.05" stroke="white" strokeWidth="1" strokeOpacity="0.1" />
-              <polyline points="70,220 120,180 170,200 220,140 270,120 320,90 340,100" stroke="#CC0000" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
-              <path d="M70,220 L120,180 L170,200 L220,140 L270,120 L320,90 L340,100 L340,240 L70,240 Z" fill="#CC0000" opacity="0.08" />
-              {[{x:70,y:220},{x:120,y:180},{x:170,y:200},{x:220,y:140},{x:270,y:120},{x:320,y:90},{x:340,y:100}].map((p,i) => (
-                <circle key={i} cx={p.x} cy={p.y} r="5" fill="#1e293b" stroke="#CC0000" strokeWidth="2" />
-              ))}
-              {[100,140,180,220].map((y,i) => (
-                <line key={i} x1="60" y1={y} x2="350" y2={y} stroke="white" strokeWidth="0.5" opacity="0.08" />
-              ))}
-              <line x1="60" y1="240" x2="350" y2="240" stroke="white" strokeWidth="1" opacity="0.15" />
-              <circle cx="320" cy="50" r="22" fill="#10b981" opacity="0.15" />
-              <text x="320" y="57" textAnchor="middle" fill="#10b981" fontSize="16" fontWeight="800" fontFamily="sans-serif" opacity="0.8">฿</text>
-              <rect x="60" y="60" width="80" height="30" rx="6" fill="#10b981" opacity="0.1" />
-              <rect x="68" y="68" width="30" height="4" rx="2" fill="#10b981" opacity="0.3" />
-              <rect x="68" y="78" width="50" height="5" rx="2" fill="#10b981" opacity="0.5" />
-              <rect x="155" y="60" width="80" height="30" rx="6" fill="#CC0000" opacity="0.1" />
-              <rect x="163" y="68" width="30" height="4" rx="2" fill="#CC0000" opacity="0.3" />
-              <rect x="163" y="78" width="50" height="5" rx="2" fill="#CC0000" opacity="0.5" />
-            </svg>
+          <div className="w-full max-w-xs animate-float-slow">
+            <img src="/roboss-logo.png" alt="Roboss" className="w-full h-auto drop-shadow-2xl rounded-full" />
           </div>
           <p className="text-sm text-slate-400 mt-4 text-center">ติดตามผลตอบแทนการลงทุนแบบ Real-time</p>
         </div>
