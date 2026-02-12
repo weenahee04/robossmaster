@@ -98,6 +98,17 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Manual Link */}
+      <div className="relative z-10 text-center pb-8">
+        <Link
+          href="/manual"
+          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]">menu_book</span>
+          คู่มือการใช้งาน
+        </Link>
+      </div>
+
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 border-t border-slate-100">
         <p className="text-xs text-slate-400">
