@@ -135,3 +135,21 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    await prisma.bankAccount.deleteMany({ where: { branchId: id } });
+    await prisma.user.deleteMany({ where: { branchId: id } });
+    await prisma.branch.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Branch DELETE error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
