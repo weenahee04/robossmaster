@@ -165,7 +165,7 @@ export default function AdminSiteConfigPage() {
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
-                    <span className="material-symbols-outlined text-white text-[20px]">local_car_wash</span>
+                    <img src="/roboss-logo.png" alt="Roboss" className="w-full h-full object-cover" />
                   )}
                 </div>
                 <div>

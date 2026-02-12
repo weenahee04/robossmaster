@@ -102,9 +102,7 @@ export default function AdminLoginPage() {
               {logoUrl ? (
                 <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
               ) : (
-                <span className="material-symbols-outlined text-white text-[32px]">
-                  local_car_wash
-                </span>
+                <img src="/roboss-logo.png" alt="Roboss" className="w-full h-full object-cover" />
               )}
             </div>
             <h1 className="text-2xl font-black text-slate-900">{brandName}</h1>
