@@ -22,6 +22,28 @@ interface ThemeData {
   brandName: string | null;
   tagline: string | null;
   presetId: string | null;
+  templateId: string;
+  borderRadius: string;
+  cardStyle: string;
+  navStyle: string;
+  buttonStyle: string;
+  headerStyle: string;
+  bannerUrl: string | null;
+  backgroundImage: string | null;
+}
+
+interface LayoutTemplate {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  features: string[];
+}
+
+interface SkinOption {
+  key: string;
+  label: string;
+  options: { value: string; label: string }[];
 }
 
 interface Preset {
@@ -59,6 +81,14 @@ const defaultTheme: ThemeData = {
   brandName: null,
   tagline: null,
   presetId: "roboss-classic",
+  templateId: "classic",
+  borderRadius: "rounded",
+  cardStyle: "glass",
+  navStyle: "pill",
+  buttonStyle: "gradient",
+  headerStyle: "gradient",
+  bannerUrl: null,
+  backgroundImage: null,
 };
 
 const colorFields = [
@@ -78,11 +108,16 @@ export default function BranchThemePage() {
   const [theme, setTheme] = useState<ThemeData>(defaultTheme);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [fonts, setFonts] = useState<FontOption[]>([]);
+  const [templates, setTemplates] = useState<LayoutTemplate[]>([]);
+  const [skins, setSkins] = useState<SkinOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [activeTab, setActiveTab] = useState<'template' | 'color' | 'skin' | 'brand'>('template');
   const fileRef = useRef<HTMLInputElement>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
+  const bgRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!branchId) return;
@@ -96,6 +131,8 @@ export default function BranchThemePage() {
         }
         setPresets(presetsData.presets || []);
         setFonts(presetsData.fonts || []);
+        setTemplates(presetsData.templates || []);
+        setSkins(presetsData.skins || []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -145,12 +182,13 @@ export default function BranchThemePage() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (field: 'logoUrl' | 'bannerUrl' | 'backgroundImage') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 500 * 1024) { alert("ไฟล์ใหญ่เกินไป (สูงสุด 500KB)"); return; }
+    const maxSize = field === 'logoUrl' ? 500 * 1024 : 1024 * 1024;
+    if (file.size > maxSize) { alert(`ไฟล์ใหญ่เกินไป (สูงสุด ${maxSize / 1024}KB)`); return; }
     const reader = new FileReader();
-    reader.onload = () => setTheme((prev) => ({ ...prev, logoUrl: reader.result as string }));
+    reader.onload = () => setTheme((prev) => ({ ...prev, [field]: reader.result as string }));
     reader.readAsDataURL(file);
   };
 
@@ -177,186 +215,275 @@ export default function BranchThemePage() {
         </div>
       </div>
 
-      {/* Preset Gallery */}
-      <Card title="ธีมสำเร็จรูป" subtitle="เลือก preset แล้วปรับแต่งเพิ่มเติมได้">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {presets.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => applyPreset(preset)}
-              className={`relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ${
-                theme.presetId === preset.id ? "border-primary ring-2 ring-primary/20" : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              {theme.presetId === preset.id && (
-                <span className="absolute top-2 right-2 material-symbols-outlined text-primary text-[16px] filled">check_circle</span>
-              )}
-              {/* Mini preview */}
-              <div className="w-full h-16 rounded-lg overflow-hidden mb-2 flex" style={{ background: preset.backgroundColor }}>
-                <div className="w-1/3 h-full flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full" style={{ background: preset.primaryColor }} />
-                </div>
-                <div className="w-1/3 h-full flex items-center justify-center">
-                  <div className="w-4 h-4 rounded" style={{ background: preset.accentColor }} />
-                </div>
-                <div className="w-1/3 h-full flex flex-col items-center justify-center gap-1">
-                  <div className="w-8 h-1 rounded" style={{ background: preset.textColor, opacity: 0.8 }} />
-                  <div className="w-6 h-1 rounded" style={{ background: preset.textColor, opacity: 0.4 }} />
-                </div>
-              </div>
-              <p className="text-xs font-bold text-slate-800">{preset.name}</p>
-              <p className="text-[10px] text-slate-500">{preset.description}</p>
-            </button>
-          ))}
-        </div>
-      </Card>
+      {/* Tab Navigation */}
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
+        {([['template', 'view_quilt', 'เทมเพลต'], ['color', 'palette', 'สี'], ['skin', 'tune', 'สกิน'], ['brand', 'badge', 'แบรนด์']] as const).map(([tab, icon, label]) => (
+          <button key={tab} onClick={() => setActiveTab(tab)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab ? 'bg-white shadow-sm text-primary font-bold' : 'text-slate-500 hover:text-slate-700'
+            }`}>
+            <span className="material-symbols-outlined text-[18px]">{icon}</span>{label}
+          </button>
+        ))}
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Colors */}
-        <Card title="สี" subtitle="ปรับสีแต่ละส่วน">
-          <div className="space-y-3">
-            {colorFields.map((field) => (
-              <div key={field.key} className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={(theme as any)[field.key]}
-                  onChange={(e) => setTheme((prev) => ({ ...prev, [field.key]: e.target.value, presetId: null }))}
-                  className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
-                />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">{field.label}</p>
-                  <p className="text-[10px] text-slate-400">{field.desc}</p>
+      {/* Template Tab */}
+      {activeTab === 'template' && (
+        <Card title="เลือกเทมเพลต" subtitle="เปลี่ยน layout ทั้งหน้า Loyalty App">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {templates.map((t) => (
+              <button key={t.id} onClick={() => setTheme((prev) => ({ ...prev, templateId: t.id }))}
+                className={`relative rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] ${
+                  theme.templateId === t.id ? 'border-primary ring-2 ring-primary/20 bg-primary-50' : 'border-slate-200 hover:border-slate-300'
+                }`}>
+                {theme.templateId === t.id && (
+                  <span className="absolute top-2 right-2 material-symbols-outlined text-primary text-[16px] filled">check_circle</span>
+                )}
+                <div className="text-3xl mb-2">{t.thumbnail}</div>
+                <p className="text-sm font-bold text-slate-800">{t.name}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>
+                <div className="mt-2 space-y-0.5">
+                  {t.features.map((f, i) => (
+                    <p key={i} className="text-[9px] text-slate-400 flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-slate-300"></span>{f}
+                    </p>
+                  ))}
                 </div>
-                <code className="text-[11px] font-mono text-slate-500 bg-slate-50 px-2 py-1 rounded">
-                  {(theme as any)[field.key]}
-                </code>
-              </div>
+              </button>
             ))}
           </div>
         </Card>
+      )}
 
-        {/* Branding + Font */}
-        <div className="space-y-6">
+      {/* Color Tab */}
+      {activeTab === 'color' && (
+        <>
+          <Card title="ธีมสำเร็จรูป" subtitle="เลือก preset แล้วปรับแต่งเพิ่มเติมได้">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {presets.map((preset) => (
+                <button key={preset.id} onClick={() => applyPreset(preset)}
+                  className={`relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] ${
+                    theme.presetId === preset.id ? 'border-primary ring-2 ring-primary/20' : 'border-slate-200 hover:border-slate-300'
+                  }`}>
+                  {theme.presetId === preset.id && (
+                    <span className="absolute top-2 right-2 material-symbols-outlined text-primary text-[16px] filled">check_circle</span>
+                  )}
+                  <div className="w-full h-16 rounded-lg overflow-hidden mb-2 flex" style={{ background: preset.backgroundColor }}>
+                    <div className="w-1/3 h-full flex items-center justify-center"><div className="w-6 h-6 rounded-full" style={{ background: preset.primaryColor }} /></div>
+                    <div className="w-1/3 h-full flex items-center justify-center"><div className="w-4 h-4 rounded" style={{ background: preset.accentColor }} /></div>
+                    <div className="w-1/3 h-full flex flex-col items-center justify-center gap-1">
+                      <div className="w-8 h-1 rounded" style={{ background: preset.textColor, opacity: 0.8 }} />
+                      <div className="w-6 h-1 rounded" style={{ background: preset.textColor, opacity: 0.4 }} />
+                    </div>
+                  </div>
+                  <p className="text-xs font-bold text-slate-800">{preset.name}</p>
+                  <p className="text-[10px] text-slate-500">{preset.description}</p>
+                </button>
+              ))}
+            </div>
+          </Card>
+          <Card title="ปรับสีเอง" subtitle="ปรับสีแต่ละส่วนแบบละเอียด">
+            <div className="grid sm:grid-cols-2 gap-3">
+              {colorFields.map((field) => (
+                <div key={field.key} className="flex items-center gap-3">
+                  <input type="color" value={(theme as any)[field.key]}
+                    onChange={(e) => setTheme((prev) => ({ ...prev, [field.key]: e.target.value, presetId: null }))}
+                    className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-800">{field.label}</p>
+                    <p className="text-[10px] text-slate-400">{field.desc}</p>
+                  </div>
+                  <code className="text-[11px] font-mono text-slate-500 bg-slate-50 px-2 py-1 rounded">{(theme as any)[field.key]}</code>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </>
+      )}
+
+      {/* Skin Tab */}
+      {activeTab === 'skin' && (
+        <>
+          {skins.map((skin) => (
+            <Card key={skin.key} title={skin.label}>
+              <div className="flex flex-wrap gap-2">
+                {skin.options.map((opt) => (
+                  <button key={opt.value} onClick={() => setTheme((prev) => ({ ...prev, [skin.key]: opt.value }))}
+                    className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                      (theme as any)[skin.key] === opt.value
+                        ? 'border-primary bg-primary-50 text-primary font-bold'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ))}
+          <Card title="รูปแบนเนอร์" subtitle="แสดงที่หัว Loyalty App (สูงสุด 1MB)">
+            <div className="flex items-center gap-4">
+              <div className="w-40 h-20 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 shrink-0">
+                {theme.bannerUrl ? <img src={theme.bannerUrl} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-slate-300">image</span>}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" icon="upload" onClick={() => bannerRef.current?.click()}>อัพโหลด</Button>
+                {theme.bannerUrl && <Button variant="outline" size="sm" icon="delete" onClick={() => setTheme((prev) => ({ ...prev, bannerUrl: null }))}>ลบ</Button>}
+              </div>
+              <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload('bannerUrl')} />
+            </div>
+          </Card>
+          <Card title="รูปพื้นหลัง" subtitle="พื้นหลังหน้า Loyalty App (สูงสุด 1MB)">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 shrink-0">
+                {theme.backgroundImage ? <img src={theme.backgroundImage} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-slate-300">wallpaper</span>}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" icon="upload" onClick={() => bgRef.current?.click()}>อัพโหลด</Button>
+                {theme.backgroundImage && <Button variant="outline" size="sm" icon="delete" onClick={() => setTheme((prev) => ({ ...prev, backgroundImage: null }))}>ลบ</Button>}
+              </div>
+              <input ref={bgRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload('backgroundImage')} />
+            </div>
+          </Card>
+        </>
+      )}
+
+      {/* Brand Tab */}
+      {activeTab === 'brand' && (
+        <div className="grid gap-6 lg:grid-cols-2">
           <Card title="โลโก้สาขา">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 shrink-0">
-                {theme.logoUrl ? (
-                  <img src={theme.logoUrl} alt="Logo" className="w-full h-full object-contain" />
-                ) : (
-                  <span className="material-symbols-outlined text-slate-300 text-[36px]">image</span>
-                )}
+                {theme.logoUrl ? <img src={theme.logoUrl} alt="Logo" className="w-full h-full object-contain" /> : <span className="material-symbols-outlined text-slate-300 text-[36px]">image</span>}
               </div>
               <div className="space-y-2">
                 <p className="text-xs text-slate-400">PNG, JPG, SVG — สูงสุด 500KB</p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" icon="upload" onClick={() => fileRef.current?.click()}>เลือกไฟล์</Button>
-                  {theme.logoUrl && (
-                    <Button variant="outline" size="sm" icon="delete" onClick={() => setTheme((prev) => ({ ...prev, logoUrl: null }))}>ลบ</Button>
-                  )}
+                  {theme.logoUrl && <Button variant="outline" size="sm" icon="delete" onClick={() => setTheme((prev) => ({ ...prev, logoUrl: null }))}>ลบ</Button>}
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload('logoUrl')} />
               </div>
             </div>
           </Card>
-
           <Card title="ข้อมูลแบรนด์">
             <div className="space-y-3">
-              <Input label="ชื่อสาขา (แสดงใน Loyalty App)" icon="badge" value={theme.brandName || ""} onChange={(e) => setTheme((prev) => ({ ...prev, brandName: e.target.value || null }))} placeholder="เช่น ROBOSS Rama9" />
-              <Input label="Tagline" icon="format_quote" value={theme.tagline || ""} onChange={(e) => setTheme((prev) => ({ ...prev, tagline: e.target.value || null }))} placeholder="เช่น AUTOMATIC CAR WASH" />
+              <Input label="ชื่อสาขา (แสดงใน Loyalty App)" icon="badge" value={theme.brandName || ''} onChange={(e) => setTheme((prev) => ({ ...prev, brandName: e.target.value || null }))} placeholder="เช่น ROBOSS Rama9" />
+              <Input label="Tagline" icon="format_quote" value={theme.tagline || ''} onChange={(e) => setTheme((prev) => ({ ...prev, tagline: e.target.value || null }))} placeholder="เช่น AUTOMATIC CAR WASH" />
             </div>
           </Card>
-
           <Card title="ฟอนต์">
             <div className="space-y-3">
-              <select
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm"
-                value={theme.fontFamily}
-                onChange={(e) => setTheme((prev) => ({ ...prev, fontFamily: e.target.value }))}
-              >
-                {fonts.map((f) => (
-                  <option key={f.value} value={f.value}>{f.label}</option>
-                ))}
+              <select className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" value={theme.fontFamily}
+                onChange={(e) => setTheme((prev) => ({ ...prev, fontFamily: e.target.value }))}>
+                {fonts.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
               </select>
               <p className="text-xs text-slate-400">ฟอนต์จะมีผลกับ Loyalty App ของสาขา</p>
             </div>
           </Card>
         </div>
-      </div>
+      )}
 
       {/* Live Preview */}
-      <Card title="ตัวอย่าง Loyalty App" subtitle="แสดงผลตาม theme ที่ตั้งค่า">
+      <Card title="ตัวอย่าง Loyalty App" subtitle={`Template: ${theme.templateId} | Card: ${theme.cardStyle} | Nav: ${theme.navStyle} | Button: ${theme.buttonStyle}`}>
         <div className="flex justify-center">
-          <div
-            className="w-[320px] rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl"
-            style={{ background: theme.backgroundColor, color: theme.textColor, fontFamily: `'${theme.fontFamily}', sans-serif` }}
-          >
-            {/* Status bar mock */}
-            <div className="h-6 flex items-center justify-between px-4 text-[10px] opacity-50">
-              <span>9:41</span>
-              <span>●●●</span>
-            </div>
+          {(() => {
+            const rd = theme.borderRadius === 'sharp' ? 'rounded-sm' : theme.borderRadius === 'pill' ? 'rounded-3xl' : 'rounded-xl';
+            const rdLg = theme.borderRadius === 'sharp' ? 'rounded' : theme.borderRadius === 'pill' ? 'rounded-[2rem]' : 'rounded-2xl';
+            const cardBg = theme.cardStyle === 'glass' ? { background: `${theme.surfaceColor}CC`, backdropFilter: 'blur(12px)', border: `1px solid ${theme.textColor}10` }
+              : theme.cardStyle === 'outline' ? { background: 'transparent', border: `2px solid ${theme.primaryColor}40` }
+              : theme.cardStyle === 'gradient' ? { background: `linear-gradient(135deg, ${theme.surfaceColor}, ${theme.primaryColor}20)` }
+              : { background: theme.surfaceColor };
+            const btnBg = theme.buttonStyle === 'gradient' ? { background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }
+              : theme.buttonStyle === 'glow' ? { background: theme.primaryColor, boxShadow: `0 0 20px ${theme.primaryColor}60` }
+              : theme.buttonStyle === 'outline' ? { background: 'transparent', border: `2px solid ${theme.primaryColor}`, color: theme.primaryColor }
+              : { background: theme.primaryColor };
+            const headerBg = theme.headerStyle === 'minimal' ? {} : theme.headerStyle === 'solid' ? { background: theme.primaryColor }
+              : theme.headerStyle === 'image' && theme.bannerUrl ? { backgroundImage: `url(${theme.bannerUrl})`, backgroundSize: 'cover' }
+              : { background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` };
+            const isModern = theme.templateId === 'modern';
+            const isPremium = theme.templateId === 'premium';
+            const isPlayful = theme.templateId === 'playful';
 
-            {/* Header */}
-            <div className="px-5 pt-2 pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                    style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }}>
-                    {theme.logoUrl ? (
-                      <img src={theme.logoUrl} alt="" className="w-full h-full rounded-full object-cover" />
-                    ) : "R"}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">{theme.brandName || "ROBOSS"}</p>
-                    <p className="text-[10px] opacity-50">{theme.tagline || "AUTOMATIC CAR WASH"}</p>
+            return (
+              <div className="w-[320px] rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl"
+                style={{ background: theme.backgroundImage ? `url(${theme.backgroundImage}) center/cover` : theme.backgroundColor, color: theme.textColor, fontFamily: `'${theme.fontFamily}', sans-serif` }}>
+                <div className="h-6 flex items-center justify-between px-4 text-[10px] opacity-50"><span>9:41</span><span>●●●</span></div>
+
+                {/* Header */}
+                <div className={`px-5 pt-2 pb-4 ${rdLg}`} style={headerBg}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 ${isPlayful ? 'rounded-2xl' : 'rounded-full'} flex items-center justify-center text-white font-bold text-sm overflow-hidden`}
+                        style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }}>
+                        {theme.logoUrl ? <img src={theme.logoUrl} alt="" className="w-full h-full object-cover" /> : 'R'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">{theme.brandName || 'ROBOSS'}</p>
+                        <p className="text-[10px] opacity-50">{theme.tagline || 'AUTOMATIC CAR WASH'}</p>
+                      </div>
+                    </div>
+                    <div className={`w-8 h-8 ${rd} flex items-center justify-center`} style={cardBg}><span className="text-xs">🔔</span></div>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: theme.surfaceColor }}>
-                  <span className="text-xs">🔔</span>
+
+                {/* Points Card */}
+                <div className={`mx-5 ${rdLg} p-4 mb-4 text-white`} style={btnBg}>
+                  <p className="text-[10px] opacity-80">แต้มสะสม</p>
+                  <p className={`${isPremium ? 'text-3xl' : 'text-2xl'} font-bold`}>1,250</p>
+                  <div className="mt-2 h-1.5 rounded-full bg-white/20"><div className="h-full rounded-full bg-white/80 w-3/5" /></div>
+                  <p className="text-[9px] mt-1 opacity-70">อีก 250 แต้มถึง Gold</p>
                 </div>
-              </div>
-            </div>
 
-            {/* Points Card */}
-            <div className="mx-5 rounded-2xl p-4 mb-4"
-              style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})` }}>
-              <p className="text-[10px] opacity-80">แต้มสะสม</p>
-              <p className="text-2xl font-bold">1,250</p>
-              <div className="mt-2 h-1.5 rounded-full bg-white/20">
-                <div className="h-full rounded-full bg-white/80 w-3/5" />
-              </div>
-              <p className="text-[9px] mt-1 opacity-70">อีก 250 แต้มถึง Gold</p>
-            </div>
-
-            {/* Stamp Card */}
-            <div className="mx-5 rounded-xl p-3 mb-4" style={{ background: theme.surfaceColor }}>
-              <p className="text-[10px] font-bold mb-2">Stamp Card</p>
-              <div className="flex gap-1.5">
-                {[1,2,3,4,5,6,7,8].map((i) => (
-                  <div key={i} className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px]"
-                    style={{ background: i <= 5 ? theme.primaryColor : `${theme.textColor}10`, color: i <= 5 ? "#fff" : theme.textColor }}>
-                    {i <= 5 ? "✓" : i}
+                {/* Stamp Card */}
+                <div className={`mx-5 ${rd} p-3 mb-4`} style={cardBg}>
+                  <p className="text-[10px] font-bold mb-2">Stamp Card</p>
+                  <div className={`flex ${isModern ? 'gap-2 justify-center' : 'gap-1.5'}`}>
+                    {[1,2,3,4,5,6,7,8].map((i) => (
+                      <div key={i} className={`${isModern ? 'w-7 h-7 rounded-full' : isPlayful ? 'w-7 h-7 rounded-2xl' : `w-7 h-7 ${rd}`} flex items-center justify-center text-[10px]`}
+                        style={{ background: i <= 5 ? theme.primaryColor : `${theme.textColor}10`, color: i <= 5 ? '#fff' : theme.textColor,
+                          ...(isPremium && i <= 5 ? { boxShadow: `0 0 8px ${theme.accentColor}40` } : {}) }}>
+                        {i <= 5 ? '✓' : i}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mx-5 grid grid-cols-3 gap-2 mb-4">
-              {["🎁 รางวัล", "📦 แพ็คเกจ", "📍 สาขา"].map((item) => (
-                <div key={item} className="rounded-xl p-2 text-center text-[10px]" style={{ background: theme.surfaceColor }}>
-                  {item}
                 </div>
-              ))}
-            </div>
 
-            {/* Bottom Nav */}
-            <div className="flex justify-around py-3 border-t" style={{ borderColor: `${theme.textColor}10`, background: theme.surfaceColor }}>
-              {["🏠", "📦", "📍", "📜", "👤"].map((icon, i) => (
-                <span key={i} className="text-sm" style={{ opacity: i === 0 ? 1 : 0.4 }}>{icon}</span>
-              ))}
-            </div>
-          </div>
+                {/* Action Buttons */}
+                <div className="mx-5 grid grid-cols-3 gap-2 mb-4">
+                  {['🎁 รางวัล', '📦 แพ็คเกจ', '📍 สาขา'].map((item) => (
+                    <div key={item} className={`${rd} p-2 text-center text-[10px]`} style={cardBg}>{item}</div>
+                  ))}
+                </div>
+
+                {/* Bottom Nav */}
+                {theme.navStyle === 'floating' ? (
+                  <div className="px-5 pb-4">
+                    <div className={`flex justify-around py-2.5 ${rdLg}`} style={{ ...cardBg, boxShadow: `0 -4px 20px ${theme.primaryColor}20` }}>
+                      {['🏠', '📦', '📍', '📜', '👤'].map((icon, i) => (
+                        <span key={i} className={`text-sm ${i === 0 ? '' : 'opacity-40'}`} style={i === 0 ? { filter: `drop-shadow(0 0 4px ${theme.primaryColor})` } : {}}>{icon}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`flex justify-around py-3 ${theme.navStyle === 'underline' ? 'border-t-0' : 'border-t'}`}
+                    style={{ borderColor: `${theme.textColor}10`, background: theme.surfaceColor }}>
+                    {['🏠', '📦', '📍', '📜', '👤'].map((icon, i) => (
+                      <div key={i} className="flex flex-col items-center gap-0.5">
+                        {theme.navStyle === 'pill' && i === 0 ? (
+                          <span className={`text-sm px-3 py-1 ${rd}`} style={{ background: `${theme.primaryColor}20` }}>{icon}</span>
+                        ) : (
+                          <span className="text-sm" style={{ opacity: i === 0 ? 1 : 0.4 }}>{icon}</span>
+                        )}
+                        {theme.navStyle === 'underline' && i === 0 && (
+                          <div className="w-4 h-0.5 rounded-full" style={{ background: theme.primaryColor }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </Card>
 

@@ -21,6 +21,14 @@ interface ThemeData {
   logoUrl?: string | null;
   brandName?: string | null;
   tagline?: string | null;
+  templateId?: string;
+  borderRadius?: string;
+  cardStyle?: string;
+  navStyle?: string;
+  buttonStyle?: string;
+  headerStyle?: string;
+  bannerUrl?: string | null;
+  backgroundImage?: string | null;
 }
 
 interface AuthContextType {

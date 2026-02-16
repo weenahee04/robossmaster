@@ -136,3 +136,104 @@ export const fontOptions = [
 ];
 
 export const defaultTheme: ThemePreset = themePresets[0];
+
+// ===== Layout Templates =====
+
+export interface LayoutTemplate {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string; // emoji or icon for preview
+  features: string[];
+}
+
+export const layoutTemplates: LayoutTemplate[] = [
+  {
+    id: "classic",
+    name: "Classic",
+    description: "แบบดั้งเดิม — การ์ดแต้ม + แถบเมนูล่าง",
+    thumbnail: "🏠",
+    features: ["Stamp Card แนวนอน", "Bottom Nav 5 แท็บ", "Header gradient", "Card แบบ glass"],
+  },
+  {
+    id: "modern",
+    name: "Modern",
+    description: "โมเดิร์นมินิมอล — เน้นพื้นที่โล่ง สะอาดตา",
+    thumbnail: "✨",
+    features: ["Stamp Card แบบวงกลม", "Bottom Nav แบบ floating", "Header minimal", "Card แบบ outline"],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    description: "หรูหรา — gradient ทอง เอฟเฟกต์เรืองแสง",
+    thumbnail: "👑",
+    features: ["Stamp Card แบบ premium gold", "Bottom Nav แบบ glow", "Header แบบ image overlay", "Card แบบ gradient"],
+  },
+  {
+    id: "playful",
+    name: "Playful",
+    description: "สนุกสดใส — มุมโค้งมน สีสดใส",
+    thumbnail: "🎨",
+    features: ["Stamp Card แบบ bubble", "Bottom Nav แบบ pill สี", "Header แบบ wave", "Card แบบ solid สีสด"],
+  },
+];
+
+// ===== Skin Options =====
+
+export interface SkinOption {
+  key: string;
+  label: string;
+  options: { value: string; label: string; preview?: string }[];
+}
+
+export const skinOptions: SkinOption[] = [
+  {
+    key: "borderRadius",
+    label: "มุมขอบ",
+    options: [
+      { value: "sharp", label: "เหลี่ยม", preview: "rounded-none" },
+      { value: "rounded", label: "มน", preview: "rounded-xl" },
+      { value: "pill", label: "โค้งมาก", preview: "rounded-3xl" },
+    ],
+  },
+  {
+    key: "cardStyle",
+    label: "สไตล์การ์ด",
+    options: [
+      { value: "glass", label: "Glass (โปร่งแสง)" },
+      { value: "solid", label: "Solid (ทึบ)" },
+      { value: "outline", label: "Outline (เส้นขอบ)" },
+      { value: "gradient", label: "Gradient (ไล่สี)" },
+    ],
+  },
+  {
+    key: "navStyle",
+    label: "แถบเมนูล่าง",
+    options: [
+      { value: "pill", label: "Pill (แคปซูล)" },
+      { value: "underline", label: "Underline (ขีดเส้น)" },
+      { value: "icon-only", label: "Icon Only (ไอคอนเท่านั้น)" },
+      { value: "floating", label: "Floating (ลอย)" },
+    ],
+  },
+  {
+    key: "buttonStyle",
+    label: "สไตล์ปุ่ม",
+    options: [
+      { value: "gradient", label: "Gradient (ไล่สี)" },
+      { value: "solid", label: "Solid (ทึบ)" },
+      { value: "outline", label: "Outline (เส้นขอบ)" },
+      { value: "glow", label: "Glow (เรืองแสง)" },
+    ],
+  },
+  {
+    key: "headerStyle",
+    label: "สไตล์หัวข้อ",
+    options: [
+      { value: "gradient", label: "Gradient (ไล่สี)" },
+      { value: "solid", label: "Solid (ทึบ)" },
+      { value: "minimal", label: "Minimal (เรียบ)" },
+      { value: "image", label: "Image (รูปภาพ)" },
+    ],
+  },
+];

@@ -357,8 +357,20 @@ model BranchTheme {
   // Typography
   fontFamily      String   @default("Kanit")
 
-  // Preset
+  // Preset (color preset)
   presetId        String?
+
+  // Template (layout variant)
+  templateId      String   @default("classic")
+
+  // Skin (visual style)
+  borderRadius    String   @default("rounded")    // sharp | rounded | pill
+  cardStyle       String   @default("glass")      // glass | solid | outline | gradient
+  navStyle        String   @default("pill")       // pill | underline | icon-only | floating
+  buttonStyle     String   @default("gradient")   // gradient | solid | outline | glow
+  headerStyle     String   @default("gradient")   // gradient | solid | minimal | image
+  bannerUrl       String?  @db.Text               // custom banner image
+  backgroundImage String?  @db.Text               // custom background image/pattern
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
