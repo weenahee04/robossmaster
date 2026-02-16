@@ -65,6 +65,11 @@ model Branch {
   notifications      Notification[]
   serviceTickets     ServiceTicket[]
   maintenanceSchedules MaintenanceSchedule[]
+  customerPoints       CustomerPoint[]
+  pointTransactions    PointTransaction[]
+  couponTemplates      CouponTemplate[]
+  customerCoupons      CustomerCoupon[]
+  loyaltyBanners       LoyaltyBanner[]
 }
 
 // ===== Bank Account =====
@@ -280,12 +285,15 @@ model RoiConfig {
 // ===== Global Wash Packages =====
 
 model GlobalWashPackage {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   // CAR | BIKE | HELMET
-  price     Float
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // CAR | BIKE | HELMET
+  price       Float
+  description String?
+  features    String?  @db.Text // JSON array of feature strings
+  imageUrl    String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   washRecords WashRecord[]
 }
@@ -339,6 +347,134 @@ model Banner {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ===== Loyalty System =====
+
+model Customer {
+  id           String   @id @default(cuid())
+  phone        String   @unique
+  name         String?
+  lineId       String?  @unique
+  profileImage String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  points            CustomerPoint[]
+  coupons           CustomerCoupon[]
+  pointTransactions PointTransaction[]
+  vehicles          Vehicle[]
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  make         String
+  model        String?
+  licensePlate String
+  createdAt    DateTime @default(now())
+}
+
+model CustomerPoint {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  branchId   String
+  branch     Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  balance    Int      @default(0)
+  totalEarned Int     @default(0)
+  tier       String   @default("SILVER") // SILVER | GOLD | PLATINUM
+  stamps     Int      @default(0) // stamp card progress (0-10)
+
+  @@unique([customerId, branchId])
+}
+
+model PointTransaction {
+  id           String   @id @default(cuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  type         String   // EARN | REDEEM | EXPIRE | ADJUST
+  amount       Int      // +/- points
+  description  String?
+  washRecordId String?
+  createdAt    DateTime @default(now())
+}
+
+model CouponTemplate {
+  id                 String   @id @default(cuid())
+  branchId           String?  // null = all branches
+  branch             Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name               String
+  description        String?
+  imageUrl           String?  @db.Text
+  type               String   // DISCOUNT_AMOUNT | DISCOUNT_PERCENT | FREE_WASH
+  value              Float    // 50 (baht) or 20 (%) or 1 (free wash)
+  pointsCost         Int      // points required to redeem
+  maxRedemptions     Int?     // null = unlimited
+  currentRedemptions Int      @default(0)
+  validDays          Int      @default(30) // coupon valid for X days after redeem
+  isActive           Boolean  @default(true)
+  expiresAt          DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  customerCoupons CustomerCoupon[]
+}
+
+model CustomerCoupon {
+  id               String         @id @default(cuid())
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  couponTemplateId String
+  couponTemplate   CouponTemplate @relation(fields: [couponTemplateId], references: [id])
+  branchId         String
+  branch           Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  code             String         @unique // QR code value
+  status           String         @default("AVAILABLE") // AVAILABLE | USED | EXPIRED
+  redeemedAt       DateTime       @default(now())
+  usedAt           DateTime?
+  expiresAt        DateTime
+}
+
+model LoyaltyBanner {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  title     String
+  subtitle  String?
+  imageUrl  String   @db.Text
+  linkUrl   String?
+  tag       String?  // e.g. "จำกัดเวลา", "สิทธิพิเศษ", "New"
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LoyaltyConfig {
+  id               String  @id @default(cuid())
+  branchId         String? @unique // null = global default
+  pointsPerBaht    Float   @default(10)  // ทุก X บาท ได้ 1 แต้ม
+  pointsExpireDays Int     @default(365)
+  goldThreshold    Int     @default(100)    // แต้มสะสมถึง Gold
+  platinumThreshold Int    @default(500)   // แต้มสะสมถึง Platinum
+  goldMultiplier   Float   @default(1.5)   // Gold ได้แต้ม x1.5
+  platinumMultiplier Float @default(2.0)   // Platinum ได้แต้ม x2
+  stampsForFreeWash Int    @default(10)    // สะสมกี่ stamp ได้ฟรี
+  isActive         Boolean @default(true)
+  updatedAt        DateTime @updatedAt
+}
+
+model LoyaltyAppConfig {
+  id             String   @id @default(cuid())
+  heroImageUrl   String?  @db.Text
+  heroTitle      String?
+  heroSubtitle   String?
+  heroButtonText String?
+  updatedAt      DateTime @updatedAt
 }
 
 model MaintenanceSchedule {
