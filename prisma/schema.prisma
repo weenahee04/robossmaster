@@ -70,6 +70,7 @@ model Branch {
   couponTemplates      CouponTemplate[]
   customerCoupons      CustomerCoupon[]
   loyaltyBanners       LoyaltyBanner[]
+  theme                BranchTheme?
 }
 
 // ===== Bank Account =====
@@ -327,6 +328,40 @@ model MachineManual {
   updatedAt    DateTime @updatedAt
 
   maintenanceSchedules MaintenanceSchedule[]
+}
+
+// ===== Branch Theme =====
+
+model BranchTheme {
+  id              String   @id @default(cuid())
+  branchId        String   @unique
+  branch          Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  // Branding
+  logoUrl         String?  @db.Text
+  brandName       String?
+  tagline         String?
+
+  // Colors
+  primaryColor    String   @default("#FF4B5C")
+  secondaryColor  String   @default("#D62D42")
+  backgroundColor String   @default("#000000")
+  surfaceColor    String   @default("#111111")
+  textColor       String   @default("#FFFFFF")
+  accentColor     String   @default("#F9D423")
+
+  // Portal Colors
+  portalPrimary   String   @default("#CC0000")
+  portalBg        String   @default("#FFFFFF")
+
+  // Typography
+  fontFamily      String   @default("Kanit")
+
+  // Preset
+  presetId        String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // ===== Site Config & Banners =====

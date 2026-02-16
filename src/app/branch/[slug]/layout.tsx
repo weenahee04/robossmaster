@@ -50,6 +50,7 @@ export default function BranchLayout({
     { label: "ลิงก์ Loyalty", icon: "qr_code_2", href: `/branch/${slug}/loyalty-link` },
     { label: "แบนเนอร์ Loyalty", icon: "image", href: `/branch/${slug}/loyalty-banners` },
     { label: "สแกนคูปอง", icon: "qr_code_scanner", href: `/branch/${slug}/loyalty-scan` },
+    { label: "ตั้งค่า Theme", icon: "palette", href: `/branch/${slug}/theme` },
   ];
 
   const handleLogout = async () => {

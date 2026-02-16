@@ -3,8 +3,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface CardProps {
+export interface CardProps {
   title?: string;
+  subtitle?: string;
   action?: React.ReactNode;
   footer?: React.ReactNode;
   noPadding?: boolean;
@@ -14,6 +15,7 @@ interface CardProps {
 
 export default function Card({
   title,
+  subtitle,
   action,
   footer,
   noPadding = false,
@@ -30,7 +32,10 @@ export default function Card({
       {(title || action) && (
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
           {title && (
-            <h3 className="font-bold text-slate-800 text-sm sm:text-base">{title}</h3>
+            <div>
+              <h3 className="font-bold text-slate-800 text-sm sm:text-base">{title}</h3>
+              {subtitle && <p className="text-[11px] text-slate-400 mt-0.5">{subtitle}</p>}
+            </div>
           )}
           {action && <div>{action}</div>}
         </div>

@@ -3,17 +3,49 @@
 import { use } from 'react';
 import { AuthProvider, useAuth } from '@/lib/loyalty-auth-context';
 
+function ThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { themeData } = useAuth();
+  const t = themeData;
+
+  const cssVars = t ? {
+    '--theme-primary': t.primaryColor,
+    '--theme-secondary': t.secondaryColor,
+    '--theme-bg': t.backgroundColor,
+    '--theme-surface': t.surfaceColor,
+    '--theme-text': t.textColor,
+    '--theme-accent': t.accentColor,
+    '--theme-font': `'${t.fontFamily}', sans-serif`,
+  } as React.CSSProperties : {};
+
+  return (
+    <div
+      className="min-h-screen max-w-md mx-auto relative shadow-2xl overflow-x-hidden"
+      style={{
+        background: t?.backgroundColor || '#000',
+        color: t?.textColor || '#fff',
+        fontFamily: t ? `'${t.fontFamily}', sans-serif` : "'Kanit', sans-serif",
+        ...cssVars,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function BranchGate({ children }: { children: React.ReactNode }) {
-  const { branchLoading, branchNotFound, branchSlug } = useAuth();
+  const { branchLoading, branchNotFound, branchSlug, themeData } = useAuth();
+  const primary = themeData?.primaryColor || '#FF4B5C';
+  const bg = themeData?.backgroundColor || '#000';
 
   if (branchLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: bg }}>
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-roboss-red rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-red-600/40 mx-auto animate-pulse">
+          <div className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-2xl mx-auto animate-pulse"
+            style={{ background: primary }}>
             <span className="text-3xl font-black text-white italic">R</span>
           </div>
-          <p className="text-gray-500 text-sm font-kanit">กำลังโหลด...</p>
+          <p className="text-gray-500 text-sm">กำลังโหลด...</p>
         </div>
       </div>
     );
@@ -21,14 +53,14 @@ function BranchGate({ children }: { children: React.ReactNode }) {
 
   if (branchNotFound) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-8">
+      <div className="min-h-screen flex items-center justify-center px-8" style={{ background: bg }}>
         <div className="text-center space-y-6">
           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto">
             <span className="text-4xl">🚫</span>
           </div>
-          <h1 className="text-2xl font-bold text-white font-kanit">ไม่พบสาขา</h1>
+          <h1 className="text-2xl font-bold text-white">ไม่พบสาขา</h1>
           <p className="text-gray-400 text-sm">
-            ไม่พบสาขา <span className="text-roboss-red font-bold">&quot;{branchSlug}&quot;</span> ในระบบ
+            ไม่พบสาขา <span className="font-bold" style={{ color: primary }}>&quot;{branchSlug}&quot;</span> ในระบบ
           </p>
           <p className="text-gray-600 text-xs">กรุณาตรวจสอบลิงก์อีกครั้ง หรือติดต่อสาขาของคุณ</p>
         </div>
@@ -49,9 +81,9 @@ export default function LoyaltyBranchLayout({
   const { slug } = use(params);
   return (
     <AuthProvider slug={slug}>
-      <div className="min-h-screen max-w-md mx-auto relative bg-black shadow-2xl overflow-x-hidden font-kanit">
+      <ThemeWrapper>
         <BranchGate>{children}</BranchGate>
-      </div>
+      </ThemeWrapper>
     </AuthProvider>
   );
 }

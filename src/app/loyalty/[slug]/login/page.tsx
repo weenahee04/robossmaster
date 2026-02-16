@@ -6,11 +6,26 @@ import { Smartphone, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/loyalty-api';
 import { useAuth } from '@/lib/loyalty-auth-context';
 
+const useThemeColors = () => {
+  const { themeData } = useAuth();
+  return {
+    primary: themeData?.primaryColor || '#FF4B5C',
+    secondary: themeData?.secondaryColor || '#D62D42',
+    bg: themeData?.backgroundColor || '#000000',
+    accent: themeData?.accentColor || '#F9D423',
+    text: themeData?.textColor || '#FFFFFF',
+    brandName: themeData?.brandName || 'ROBOSS',
+    tagline: themeData?.tagline || 'AUTOMATIC CAR WASH',
+    logoUrl: themeData?.logoUrl,
+  };
+};
+
 export default function LoyaltyLoginPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
   const { setCustomer, branchInfo } = useAuth();
+  const tc = useThemeColors();
 
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -80,20 +95,24 @@ export default function LoyaltyLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col relative overflow-hidden font-kanit">
-      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-roboss-red/20 rounded-full blur-[100px]"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] bg-yellow-500/10 rounded-full blur-[100px]"></div>
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full blur-[100px]" style={{ background: `${tc.primary}33` }}></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] rounded-full blur-[100px]" style={{ background: `${tc.accent}1A` }}></div>
 
       <div className="flex-1 flex flex-col justify-center px-10 space-y-12 relative z-10">
         <div className="space-y-6">
-          <div className="w-20 h-20 bg-roboss-red rounded-[2rem] flex items-center justify-center shadow-2xl shadow-red-600/40">
-            <span className="text-4xl font-black text-white italic">R</span>
+          <div className="w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-2xl" style={{ background: tc.primary }}>
+            {tc.logoUrl ? (
+              <img src={tc.logoUrl} alt="Logo" className="w-full h-full rounded-[2rem] object-cover" />
+            ) : (
+              <span className="text-4xl font-black text-white italic">R</span>
+            )}
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-white tracking-tight">ROBOSS</h1>
-            <p className="text-gray-400 text-lg">AUTOMATIC CAR WASH</p>
+            <h1 className="text-4xl font-bold tracking-tight">{tc.brandName}</h1>
+            <p className="text-gray-400 text-lg">{tc.tagline}</p>
             {branchInfo?.name && (
-              <p className="text-roboss-red text-sm font-bold bg-roboss-red/10 px-3 py-1 rounded-full w-fit">
+              <p className="text-sm font-bold px-3 py-1 rounded-full w-fit" style={{ color: tc.primary, background: `${tc.primary}1A` }}>
                 สาขา {branchInfo.name}
               </p>
             )}
@@ -115,11 +134,12 @@ export default function LoyaltyLoginPage() {
                 />
               </div>
             </div>
-            {error && <p className="text-roboss-red text-sm">{error}</p>}
+            {error && <p className="text-sm" style={{ color: tc.primary }}>{error}</p>}
             <button
               onClick={handleSendOTP}
               disabled={isLoading}
-              className="w-full gradient-red py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-red-950/40 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: `linear-gradient(135deg, ${tc.primary}, ${tc.secondary})` }}
             >
               {isLoading ? 'กำลังส่ง...' : <>ขอรหัส OTP <ChevronRight size={20} /></>}
             </button>
@@ -138,13 +158,14 @@ export default function LoyaltyLoginPage() {
                 maxLength={4}
                 className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 text-white text-2xl text-center focus:outline-none focus:border-roboss-red focus:ring-1 focus:ring-roboss-red/50 transition-all font-mono tracking-[1em]"
               />
-              <p className="text-gray-600 text-xs text-center mt-2">Mock OTP: ใช้รหัส <span className="text-roboss-red font-bold">1234</span></p>
+              <p className="text-gray-600 text-xs text-center mt-2">Mock OTP: ใช้รหัส <span className="font-bold" style={{ color: tc.primary }}>1234</span></p>
             </div>
-            {error && <p className="text-roboss-red text-sm">{error}</p>}
+            {error && <p className="text-sm" style={{ color: tc.primary }}>{error}</p>}
             <button
               onClick={handleVerifyOTP}
               disabled={isLoading}
-              className="w-full gradient-red py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-red-950/40 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: `linear-gradient(135deg, ${tc.primary}, ${tc.secondary})` }}
             >
               {isLoading ? 'กำลังตรวจสอบ...' : <>ยืนยัน <ChevronRight size={20} /></>}
             </button>
@@ -167,11 +188,12 @@ export default function LoyaltyLoginPage() {
               />
             </div>
             <p className="text-gray-500 text-xs">เบอร์: {tempPhone} — สมัครสมาชิกใหม่</p>
-            {error && <p className="text-roboss-red text-sm">{error}</p>}
+            {error && <p className="text-sm" style={{ color: tc.primary }}>{error}</p>}
             <button
               onClick={handleRegister}
               disabled={isLoading}
-              className="w-full gradient-red py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-red-950/40 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: `linear-gradient(135deg, ${tc.primary}, ${tc.secondary})` }}
             >
               {isLoading ? 'กำลังสมัคร...' : <>สมัครสมาชิก <ChevronRight size={20} /></>}
             </button>

@@ -10,6 +10,19 @@ interface BranchInfo {
   isActive: boolean;
 }
 
+interface ThemeData {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
+  textColor: string;
+  accentColor: string;
+  fontFamily: string;
+  logoUrl?: string | null;
+  brandName?: string | null;
+  tagline?: string | null;
+}
+
 interface AuthContextType {
   customer: any;
   setCustomer: (c: any) => void;
@@ -21,6 +34,7 @@ interface AuthContextType {
   refreshPoints: () => void;
   isLoggedIn: boolean;
   logout: () => void;
+  themeData: ThemeData | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,6 +48,7 @@ const AuthContext = createContext<AuthContextType>({
   refreshPoints: () => {},
   isLoggedIn: false,
   logout: () => {},
+  themeData: null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -50,17 +65,22 @@ export function AuthProvider({
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [branchLoading, setBranchLoading] = useState(true);
   const [branchNotFound, setBranchNotFound] = useState(false);
+  const [themeData, setThemeData] = useState<ThemeData | null>(null);
 
   // Validate branch slug on mount
   useEffect(() => {
     setBranchLoading(true);
     setBranchNotFound(false);
-    api.getBranch(slug).then((data) => {
-      if (!data || data.error) {
+    Promise.all([
+      api.getBranch(slug),
+      fetch(`/api/loyalty/theme?branch=${slug}`).then(r => r.json()).catch(() => null),
+    ]).then(([branchData, theme]) => {
+      if (!branchData || branchData.error) {
         setBranchNotFound(true);
       } else {
-        setBranchInfo(data);
+        setBranchInfo(branchData);
       }
+      if (theme) setThemeData(theme);
       setBranchLoading(false);
     }).catch(() => {
       setBranchNotFound(true);
@@ -113,6 +133,7 @@ export function AuthProvider({
         refreshPoints,
         isLoggedIn: !!customer,
         logout,
+        themeData,
       }}
     >
       {children}
