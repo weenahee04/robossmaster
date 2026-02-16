@@ -20,8 +20,8 @@ export default function LoyaltyLinksPage() {
   const [loyaltyDomain, setLoyaltyDomain] = useState("https://loyalty.roboss.app");
 
   useEffect(() => {
-    const domain = process.env.NEXT_PUBLIC_LOYALTY_URL || "https://loyalty.roboss.app";
-    setLoyaltyDomain(domain);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    setLoyaltyDomain(origin + "/loyalty");
 
     fetch("/api/branches")
       .then((r) => r.json())

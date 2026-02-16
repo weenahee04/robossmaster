@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
 /* ===== Roboss Design System ===== */
 
@@ -150,4 +151,36 @@ body {
 
 .animate-pulse-glow {
   animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* ===== Loyalty App Styles ===== */
+.font-kanit {
+  font-family: 'Kanit', sans-serif;
+}
+
+.bg-roboss-red { background-color: #FF4B5C; }
+.text-roboss-red { color: #FF4B5C; }
+.border-roboss-red { border-color: #FF4B5C; }
+.bg-roboss-dark { background-color: #111; }
+.shadow-red-600\/30 { box-shadow: 0 10px 15px -3px rgba(220,38,38,0.3); }
+.shadow-red-600\/40 { box-shadow: 0 10px 15px -3px rgba(220,38,38,0.4); }
+.shadow-red-950\/40 { box-shadow: 0 10px 15px -3px rgba(69,10,10,0.4); }
+.shadow-yellow-900\/20 { box-shadow: 0 10px 15px -3px rgba(113,63,18,0.2); }
+
+.gradient-red {
+  background: linear-gradient(135deg, #FF4B5C 0%, #D62D42 100%);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, #F9D423 0%, #FF4E50 100%);
+}
+
+.gradient-premium-gold {
+  background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

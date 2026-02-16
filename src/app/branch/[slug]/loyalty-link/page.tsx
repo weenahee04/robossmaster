@@ -21,9 +21,9 @@ export default function LoyaltyLinkPage() {
       })
       .catch(() => {});
 
-    // Loyalty domain — ใช้ env หรือ default
-    const domain = process.env.NEXT_PUBLIC_LOYALTY_URL || "https://loyalty.roboss.app";
-    setLoyaltyDomain(domain);
+    // Loyalty domain — ใช้ origin เดียวกัน + /loyalty path
+    const origin = window.location.origin;
+    setLoyaltyDomain(origin + "/loyalty");
   }, [slug]);
 
   const loyaltyUrl = `${loyaltyDomain}/${slug}`;
