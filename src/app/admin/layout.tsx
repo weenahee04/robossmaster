@@ -20,6 +20,10 @@ const adminMenuItems: SidebarItem[] = [
   { label: "คู่มือเครื่อง", icon: "precision_manufacturing", href: "/admin/manuals" },
   { label: "ตั้งค่าเว็บ", icon: "settings", href: "/admin/site-config" },
   { label: "แบนเนอร์", icon: "image", href: "/admin/banners" },
+  { label: "ลิงก์ Loyalty", icon: "qr_code_2", href: "/admin/loyalty-links" },
+  { label: "คูปอง Loyalty", icon: "confirmation_number", href: "/admin/loyalty-coupons" },
+  { label: "ตั้งค่า Loyalty", icon: "loyalty", href: "/admin/loyalty-config" },
+  { label: "ลูกค้า Loyalty", icon: "people", href: "/admin/loyalty-customers" },
 ];
 
 export default function AdminLayout({

@@ -46,6 +46,9 @@ export default function BranchLayout({
     { label: "ลงเวลา", icon: "schedule", href: `/branch/${slug}/hr/attendance` },
     { label: "เงินเดือน", icon: "payments", href: `/branch/${slug}/hr/payroll` },
     { label: "ลางาน", icon: "event_busy", href: `/branch/${slug}/hr/leave` },
+    { label: "ลิงก์ Loyalty", icon: "qr_code_2", href: `/branch/${slug}/loyalty-link` },
+    { label: "แบนเนอร์ Loyalty", icon: "image", href: `/branch/${slug}/loyalty-banners` },
+    { label: "สแกนคูปอง", icon: "qr_code_scanner", href: `/branch/${slug}/loyalty-scan` },
   ];
 
   const handleLogout = async () => {
