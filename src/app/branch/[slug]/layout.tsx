@@ -34,6 +34,7 @@ export default function BranchLayout({
   const branchMenuItems: SidebarItem[] = [
     { label: "แดชบอร์ด", icon: "dashboard", href: `/branch/${slug}/dashboard` },
     { label: "บันทึก Wash", icon: "local_car_wash", href: `/branch/${slug}/wash` },
+    { label: "แพ็คเกจสาขา", icon: "inventory_2", href: `/branch/${slug}/wash-packages` },
     { label: "รายรับ", icon: "trending_up", href: `/branch/${slug}/income` },
     { label: "รายจ่าย", icon: "trending_down", href: `/branch/${slug}/expense` },
     { label: "รายงาน", icon: "assessment", href: `/branch/${slug}/reports` },

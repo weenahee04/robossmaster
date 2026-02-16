@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const branchId = searchParams.get("branchId");
     if (!branchId) return NextResponse.json({ error: "Missing branchId" }, { status: 400 });
 
-    const [records, globalPackages] = await Promise.all([
+    const [records, globalPackages, branchPackages] = await Promise.all([
       prisma.washRecord.findMany({
         where: { branchId },
         orderBy: { date: "desc" },
@@ -24,10 +24,17 @@ export async function GET(request: NextRequest) {
         where: { isActive: true },
         orderBy: [{ type: "asc" }, { name: "asc" }],
       }),
+      prisma.washPackage.findMany({
+        where: { branchId, isActive: true },
+        orderBy: [{ type: "asc" }, { name: "asc" }],
+      }),
     ]);
 
-    // Use global packages as the available packages for branches
-    const packages = globalPackages;
+    // Merge global + branch-specific packages
+    const packages = [
+      ...globalPackages.map((p) => ({ ...p, source: "global" as const })),
+      ...branchPackages.map((p) => ({ ...p, source: "branch" as const })),
+    ];
 
     // Summary stats
     const now = new Date();
