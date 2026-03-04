@@ -1,8 +1,5 @@
 'use client';
 
-import { ChevronRight, Gift, Zap, Star, ShieldCheck, Bell, Settings } from 'lucide-react';
-import StampCard from './StampCard';
-
 interface HomePageProps {
   user: any;
   banners: any[];
@@ -12,175 +9,172 @@ interface HomePageProps {
   onOpenRewards: () => void;
   onOpenNotifications: () => void;
   onOpenSettings: () => void;
+  onOpenBranches: () => void;
+  onOpenHistory: () => void;
 }
 
-export default function HomePage({ user, banners, config, branchName, onOpenQR, onOpenRewards, onOpenNotifications, onOpenSettings }: HomePageProps) {
-  const nextTier = user.memberTier === 'SILVER' ? 'Gold' : user.memberTier === 'GOLD' ? 'Platinum' : 'Maximum';
+export default function HomePage({ user, banners, config, branchName, onOpenQR, onOpenRewards, onOpenNotifications, onOpenSettings, onOpenBranches, onOpenHistory }: HomePageProps) {
   const goldThreshold = config?.config?.goldThreshold || 100;
   const platinumThreshold = config?.config?.platinumThreshold || 500;
   const targetPoints = user.memberTier === 'SILVER' ? goldThreshold : user.memberTier === 'GOLD' ? platinumThreshold : platinumThreshold;
   const progressPercent = Math.min(100, (user.points / targetPoints) * 100);
-  const remaining = Math.max(0, targetPoints - user.points);
-
   const tierLabel = user.memberTier === 'SILVER' ? 'Silver' : user.memberTier === 'GOLD' ? 'Gold' : 'Platinum';
+  const tierThaiLabel = user.memberTier === 'SILVER' ? 'สมาชิกระดับเงิน' : user.memberTier === 'GOLD' ? 'สมาชิกระดับทอง' : 'สมาชิกระดับแพลทินัม';
 
-  const appConfig = config?.appConfig;
+  const strokeDasharray = 175.93;
+  const strokeDashoffset = strokeDasharray * (1 - progressPercent / 100);
+
+  const tierGradient = user.memberTier === 'GOLD'
+    ? 'from-[#dcb162] to-[#b88a3b]'
+    : user.memberTier === 'PLATINUM'
+      ? 'from-[#e5e5e5] to-[#a0a0a0]'
+      : 'from-[#c0c0c0] to-[#808080]';
+
+  const services = [
+    { icon: 'local_car_wash', label: 'ล้างด่วน' },
+    { icon: 'shutter_speed', label: 'เคลือบแก้ว' },
+    { icon: 'vacuum', label: 'ดูดฝุ่น' },
+    { icon: 'auto_fix', label: 'ขัดสี' },
+  ];
 
   return (
-    <div className="pb-10">
-      {/* Profile Header */}
-      <div className="px-6 pt-10 pb-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative group cursor-pointer" onClick={onOpenSettings}>
-              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 p-0.5 group-active:scale-95 transition-transform">
-                {user.profileImage ? (
-                  <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover rounded-full" />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-roboss-red/20 flex items-center justify-center text-roboss-red font-bold text-xl">
-                    {(user.name || 'U').charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="absolute -bottom-1 -right-1 bg-roboss-red w-5 h-5 rounded-full border-2 border-black flex items-center justify-center">
-                <ShieldCheck size={10} color="white" fill="white" />
-              </div>
-            </div>
-            <div className="space-y-0.5">
-              <h2 className="text-xl font-bold text-white font-kanit tracking-tight">{user.name}</h2>
-              <div className="flex items-center gap-1.5">
-                <p className="text-gray-500 text-xs font-medium bg-white/5 px-2 py-0.5 rounded-full w-fit">
-                  {tierLabel} Member
-                </p>
-                {branchName && (
-                  <p className="text-roboss-red text-[10px] font-bold bg-roboss-red/10 px-2 py-0.5 rounded-full w-fit">
-                    {branchName}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onOpenNotifications} className="p-2.5 bg-white/5 rounded-full text-gray-400 relative active:scale-90 transition-transform">
-              <Bell size={22} />
-            </button>
-            <button onClick={onOpenSettings} className="p-2.5 bg-white/5 rounded-full text-gray-400 active:scale-90 transition-transform">
-              <Settings size={22} />
-            </button>
+    <div className="flex flex-col overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-glow-red pointer-events-none z-0"></div>
+
+      {/* Header */}
+      <header className="relative z-10 pt-12 px-6 pb-6 flex items-start justify-between">
+        <div className="flex flex-col">
+          <span className="text-gray-400 text-sm font-medium">ยินดีต้อนรับ,</span>
+          <h1 className="text-2xl font-bold text-white mt-1">{user.name}</h1>
+          <div className="mt-2 flex items-center gap-2">
+            <span className={`bg-gradient-to-r ${tierGradient} text-black text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider`}>
+              {tierLabel} Tier
+            </span>
+            <span className="text-xs text-gray-500">{tierThaiLabel}</span>
           </div>
         </div>
-      </div>
-
-      <div className="px-6 space-y-6">
-        {/* Membership Progress Banner */}
-        {user.memberTier !== 'PLATINUM' && (
-          <div className="bg-roboss-dark border border-white/5 rounded-[2rem] p-4 flex items-center gap-4 relative overflow-hidden group active:scale-[0.98] transition-all">
-            <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-              <ShieldCheck size={80} />
-            </div>
-            <div className="w-12 h-12 rounded-2xl gradient-premium-gold flex items-center justify-center flex-shrink-0 shadow-lg shadow-yellow-900/20">
-              <Star className="text-white" size={24} fill="currentColor" />
-            </div>
-            <div className="flex-1 space-y-2 relative z-10">
-              <div className="flex justify-between items-end">
-                <p className="text-xs font-bold text-white">อีกนิดเดียวจะถึงระดับ {nextTier}!</p>
-                <p className="text-[10px] text-gray-500 font-medium">สะสมอีก {remaining} แต้ม</p>
-              </div>
-              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-yellow-600 to-yellow-200 rounded-full transition-all duration-1000"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
-              </div>
-            </div>
-            <ChevronRight size={16} className="text-gray-600" />
+        <div className="relative w-16 h-16 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle className="text-[#1a1a1a]" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" strokeWidth="4" />
+            <circle className="text-[#f20d0d]" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} strokeLinecap="round" strokeWidth="4" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-xs">
+            <span className="text-white font-bold">{Math.round(progressPercent)}%</span>
+            <span className="text-[8px] text-gray-400 uppercase">Next</span>
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* Points Summary */}
-        <div className="bg-roboss-dark rounded-3xl p-6 relative overflow-hidden border border-white/5">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-          <div className="relative z-10 flex justify-between items-end">
-            <div className="space-y-1">
-              <p className="text-gray-400 text-xs uppercase tracking-widest">แต้มสะสมทั้งหมด</p>
-              <p className="text-4xl font-bold text-white tracking-tight">{user.points.toLocaleString()}</p>
+      {/* Main Content */}
+      <main className="relative z-10 flex-1 px-6 pb-24 overflow-y-auto scrollbar-hide">
+        {/* Points Card */}
+        <div className="w-full rounded-2xl p-6 relative overflow-hidden mb-8 border border-white/5 shadow-xl" style={{ background: '#1a1a1a', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10" style={{ background: 'rgba(242,13,13,0.1)' }}></div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">คะแนนสะสม (Points)</p>
+                <h2 className="text-4xl font-bold text-white tracking-tight">
+                  {user.points.toLocaleString()} <span className="text-lg font-normal" style={{ color: '#f20d0d' }}>pts</span>
+                </h2>
+              </div>
+              <button
+                onClick={onOpenQR}
+                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors border border-white/10"
+              >
+                <span className="material-symbols-outlined text-gray-300">qr_code_scanner</span>
+              </button>
             </div>
-            <button
-              onClick={onOpenRewards}
-              className="text-black text-sm font-bold flex items-center gap-1 gradient-premium-gold px-4 py-2 rounded-xl active:scale-95 transition-transform shadow-lg shadow-yellow-950/40"
-            >
-              แลกรางวัล <ChevronRight size={16} />
-            </button>
+            <div className="h-px w-full bg-white/10 mb-4"></div>
+            <div className="flex justify-between items-end">
+              <div className="text-xs text-gray-500">
+                {branchName && <>สาขา: <span className="text-gray-300">{branchName}</span></>}
+              </div>
+              <button onClick={onOpenHistory} className="text-xs font-semibold flex items-center gap-1 transition-colors hover:text-white" style={{ color: '#f20d0d' }}>
+                ประวัติคะแนน <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Redemption Banner */}
-        <div className="gradient-red rounded-3xl p-5 flex items-center justify-between relative overflow-hidden shadow-lg shadow-red-950/20">
-          <div className="absolute top-0 right-0 opacity-10 -mr-4 -mt-4 transform rotate-12">
-            <Gift size={100} />
+        {/* Services Grid */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white">บริการของเรา</h3>
+            <button onClick={onOpenBranches} className="text-xs text-gray-400 hover:text-[#f20d0d] transition-colors">ดูทั้งหมด</button>
           </div>
-          <div className="relative z-10 space-y-1">
-            <h4 className="text-white font-bold text-sm">สิทธิพิเศษวันนี้!</h4>
-            <p className="text-white/80 text-xs">ใช้แต้มแลกคูปองส่วนลดได้เลย</p>
-            <button onClick={onOpenRewards} className="mt-2 bg-white text-roboss-red px-4 py-1.5 rounded-full text-[10px] font-bold shadow-md active:scale-95 transition-transform uppercase tracking-wider">
-              แลกสิทธิ์เลย
-            </button>
-          </div>
-          <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm border border-white/10">
-            <Zap className="text-white" size={24} fill="white" />
+          <div className="grid grid-cols-4 gap-4">
+            {services.map((svc) => (
+              <button key={svc.icon} onClick={onOpenBranches} className="flex flex-col items-center gap-2 group">
+                <div className="w-14 h-14 rounded-2xl border border-white/5 flex items-center justify-center group-hover:border-[#f20d0d]/50 group-active:scale-95 transition-all shadow-lg" style={{ background: '#1a1a1a' }}>
+                  <span className="material-symbols-outlined text-2xl" style={{ color: '#f20d0d' }}>{svc.icon}</span>
+                </div>
+                <span className="text-xs text-gray-300 font-medium">{svc.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Stamp Card */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white font-kanit">สะสมแต้มล้างฟรี</h3>
-            <p className="text-roboss-red text-sm font-medium">อีก {user.totalStamps - user.currentStamps} ครั้ง ฟรี!</p>
+        {/* Promotions */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white">โปรโมชั่นแนะนำ</h3>
           </div>
-          <StampCard current={user.currentStamps} total={user.totalStamps} />
-        </div>
-
-        {/* Banners */}
-        {banners.length > 0 && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white font-kanit">โปรโมชั่นและข่าวสาร</h3>
-            </div>
-            <div className="flex overflow-x-auto no-scrollbar gap-4 pb-2 snap-x">
-              {banners.map((banner: any) => (
-                <div key={banner.id} className="flex-shrink-0 w-[85%] snap-center rounded-[2rem] overflow-hidden relative aspect-[16/9] border border-white/5">
-                  <img src={banner.imageUrl} alt={banner.title} className="absolute inset-0 w-full h-full object-cover brightness-[0.4]" />
-                  {banner.tag && (
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-roboss-red text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">{banner.tag}</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    <h4 className="text-xl font-bold text-white mb-1 font-kanit">{banner.title}</h4>
-                    {banner.subtitle && <p className="text-gray-300 text-sm line-clamp-1">{banner.subtitle}</p>}
+            {banners.length > 0 ? banners.map((banner: any) => (
+              <div key={banner.id} className="rounded-xl border border-white/5 overflow-hidden group shadow-lg active:scale-[0.99] transition-transform" style={{ background: '#0f0f0f' }}>
+                <div className="h-32 relative">
+                  <img alt={banner.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" src={banner.imageUrl} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
+                  <div className="absolute bottom-3 left-4">
+                    {banner.tag && (
+                      <span className="px-2 py-0.5 text-white text-[10px] font-bold rounded uppercase mb-1 inline-block" style={{ background: '#f20d0d' }}>{banner.tag}</span>
+                    )}
+                    <h4 className="text-white font-bold text-lg">{banner.title}</h4>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="p-4 flex justify-between items-center" style={{ background: '#1a1a1a' }}>
+                  <div>
+                    {banner.subtitle && <p className="text-gray-400 text-xs mb-1">{banner.subtitle}</p>}
+                  </div>
+                  <button onClick={onOpenRewards} className="px-4 py-2 bg-white/5 hover:bg-[#f20d0d] text-white text-xs font-bold rounded-lg transition-colors border border-white/10 hover:border-transparent">
+                    ดูรายละเอียด
+                  </button>
+                </div>
+              </div>
+            )) : (
+              <>
+                <div className="rounded-xl border border-white/5 overflow-hidden shadow-lg" style={{ background: '#0f0f0f' }}>
+                  <div className="p-4 flex justify-between items-center" style={{ background: '#1a1a1a' }}>
+                    <div>
+                      <p className="text-white font-bold text-sm">สะสมแต้มล้างฟรี</p>
+                      <p className="text-gray-400 text-xs mt-1">อีก {Math.max(0, user.totalStamps - user.currentStamps)} ครั้ง ได้ล้างฟรี!</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold">{user.currentStamps}/{user.totalStamps}</span>
+                      <span className="material-symbols-outlined text-[#f20d0d]">stars</span>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${(user.currentStamps / user.totalStamps) * 100}%`, background: '#f20d0d' }}></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-white/5 overflow-hidden shadow-lg flex h-24" style={{ background: '#0f0f0f' }}>
+                  <button onClick={onOpenRewards} className="flex-1 p-3 flex flex-col justify-center relative">
+                    <h4 className="text-white font-bold text-sm mb-1">แลกคะแนนรับสิทธิ์</h4>
+                    <p className="text-gray-400 text-xs mb-2">ใช้คะแนนแลกคูปองส่วนลดได้เลย</p>
+                    <div className="flex items-center gap-1 text-xs font-bold" style={{ color: '#f20d0d' }}>
+                      ดูรางวัล <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        )}
-
-        {/* Hero Feature */}
-        {appConfig?.heroImageUrl && (
-          <div className="rounded-[2.5rem] overflow-hidden relative group border border-white/5">
-            <img src={appConfig.heroImageUrl} alt="Feature" className="w-full h-56 object-cover brightness-50 group-hover:scale-105 transition-transform duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent p-8 flex flex-col justify-end">
-              <h4 className="text-2xl font-bold text-white mb-2 leading-tight font-kanit">{appConfig.heroTitle || 'Roboss Car Wash'}</h4>
-              {appConfig.heroSubtitle && <p className="text-gray-300 text-sm mb-6">{appConfig.heroSubtitle}</p>}
-              {appConfig.heroButtonText && (
-                <button className="bg-white text-black font-bold py-3 px-8 rounded-2xl w-fit active:scale-95 transition-transform shadow-lg">
-                  {appConfig.heroButtonText}
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

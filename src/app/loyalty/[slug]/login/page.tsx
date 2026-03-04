@@ -9,11 +9,11 @@ import { useAuth } from '@/lib/loyalty-auth-context';
 const useThemeColors = () => {
   const { themeData } = useAuth();
   return {
-    primary: themeData?.primaryColor || '#FF4B5C',
-    secondary: themeData?.secondaryColor || '#D62D42',
-    bg: themeData?.backgroundColor || '#000000',
-    accent: themeData?.accentColor || '#F9D423',
-    text: themeData?.textColor || '#FFFFFF',
+    primary: themeData?.primaryColor || '#f20d0d',
+    secondary: themeData?.secondaryColor || '#c20808',
+    bg: themeData?.backgroundColor || '#050505',
+    accent: themeData?.accentColor || '#dcb162',
+    text: themeData?.textColor || '#f3f4f6',
     brandName: themeData?.brandName || 'ROBOSS',
     tagline: themeData?.tagline || 'AUTOMATIC CAR WASH',
     logoUrl: themeData?.logoUrl,

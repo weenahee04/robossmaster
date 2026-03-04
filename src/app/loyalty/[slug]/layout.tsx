@@ -19,11 +19,11 @@ function ThemeWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="min-h-screen max-w-md mx-auto relative shadow-2xl overflow-x-hidden"
+      className="loyalty-app min-h-screen max-w-md mx-auto relative shadow-2xl overflow-x-hidden font-display antialiased"
       style={{
-        background: t?.backgroundColor || '#000',
-        color: t?.textColor || '#fff',
-        fontFamily: t ? `'${t.fontFamily}', sans-serif` : "'Kanit', sans-serif",
+        background: t?.backgroundColor || '#050505',
+        color: t?.textColor || '#f3f4f6',
+        fontFamily: t ? `'${t.fontFamily}', 'Noto Sans Thai', sans-serif` : "'Noto Sans Thai', 'Inter', sans-serif",
         ...cssVars,
       }}
     >

@@ -48,3 +48,6 @@ next-env.d.ts
 # SQLite (dev only)
 *.db
 *.db-journal
+
+# Local Netlify folder
+.netlify

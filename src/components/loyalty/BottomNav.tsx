@@ -1,38 +1,60 @@
 'use client';
 
-import { Home, Package, History, User as UserIcon, MapPin } from 'lucide-react';
-
 interface BottomNavProps {
-  activeTab: 'home' | 'packages' | 'branches' | 'history' | 'profile';
+  activeTab: string;
   setActiveTab: (tab: any) => void;
+  onScan: () => void;
 }
 
-export default function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
-  const tabs = [
-    { id: 'home', icon: <Home size={22} />, label: 'หน้าแรก' },
-    { id: 'packages', icon: <Package size={22} />, label: 'แพ็กเกจ' },
-    { id: 'branches', icon: <MapPin size={22} />, label: 'สาขา' },
-    { id: 'history', icon: <History size={22} />, label: 'ประวัติ' },
-    { id: 'profile', icon: <UserIcon size={22} />, label: 'โปรไฟล์' },
-  ];
-
+export default function BottomNav({ activeTab, setActiveTab, onScan }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/80 backdrop-blur-xl border-t border-white/10 px-4 py-4 z-40">
-      <div className="flex justify-between items-center">
-        {tabs.map((tab) => (
+    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50" style={{ background: 'rgba(26,26,26,0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="border-t border-white/5 pb-6 pt-2 px-6 flex justify-between items-center">
+        <button
+          onClick={() => setActiveTab('home')}
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'home' ? 'text-[#f20d0d]' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          <span className={`material-symbols-outlined ${activeTab === 'home' ? 'fill-1' : ''}`}>home</span>
+          <span className="text-[10px] font-medium">หน้าหลัก</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('coupons')}
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'coupons' ? 'text-[#f20d0d]' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          <span className={`material-symbols-outlined ${activeTab === 'coupons' ? 'fill-1' : ''}`}>confirmation_number</span>
+          <span className="text-[10px] font-medium">คูปอง</span>
+        </button>
+
+        <div className="relative -top-6">
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === tab.id ? 'text-roboss-red' : 'text-gray-500 hover:text-gray-400'}`}
+            onClick={onScan}
+            className="w-14 h-14 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all border-4"
+            style={{
+              background: '#f20d0d',
+              boxShadow: '0 0 15px rgba(242,13,13,0.5)',
+              borderColor: '#050505',
+            }}
           >
-            <div className={`p-1 rounded-lg transition-all duration-300 ${activeTab === tab.id ? 'scale-110' : ''}`}>
-              {tab.icon}
-            </div>
-            <span className={`text-[10px] font-medium transition-opacity duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-70'}`}>
-              {tab.label}
-            </span>
+            <span className="material-symbols-outlined text-3xl">qr_code_2</span>
           </button>
-        ))}
+        </div>
+
+        <button
+          onClick={() => setActiveTab('history')}
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'history' ? 'text-[#f20d0d]' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          <span className={`material-symbols-outlined ${activeTab === 'history' ? 'fill-1' : ''}`}>history</span>
+          <span className="text-[10px] font-medium">ประวัติ</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'profile' ? 'text-[#f20d0d]' : 'text-gray-500 hover:text-gray-300'}`}
+        >
+          <span className={`material-symbols-outlined ${activeTab === 'profile' ? 'fill-1' : ''}`}>person</span>
+          <span className="text-[10px] font-medium">บัญชี</span>
+        </button>
       </div>
     </nav>
   );

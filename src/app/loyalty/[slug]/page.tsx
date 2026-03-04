@@ -5,23 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/loyalty-auth-context';
 import { api } from '@/lib/loyalty-api';
 import HomePage from '@/components/loyalty/HomePage';
-import PackagesPage from '@/components/loyalty/PackagesPage';
 import BranchesPage from '@/components/loyalty/BranchesPage';
 import HistoryPage from '@/components/loyalty/HistoryPage';
 import ProfilePage from '@/components/loyalty/ProfilePage';
-import RewardsPage from '@/components/loyalty/RewardsPage';
+import CouponsPage from '@/components/loyalty/CouponsPage';
 import NotificationsPage from '@/components/loyalty/NotificationsPage';
+import ScanPage from '@/components/loyalty/ScanPage';
 import BottomNav from '@/components/loyalty/BottomNav';
-import QRModal from '@/components/loyalty/QRModal';
-import { QrCode } from 'lucide-react';
 
-type Tab = 'home' | 'packages' | 'branches' | 'history' | 'profile' | 'rewards' | 'notifications';
+type Tab = 'home' | 'coupons' | 'branches' | 'history' | 'profile' | 'notifications';
 
 export default function LoyaltyBranchPage() {
   const router = useRouter();
   const { customer, isLoggedIn, branchSlug, branchInfo, pointsData, refreshPoints, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [showQR, setShowQR] = useState(false);
+  const [showScan, setShowScan] = useState(false);
   const [coupons, setCoupons] = useState<any>({ templates: [], myCoupons: [] });
   const [banners, setBanners] = useState<any[]>([]);
   const [config, setConfig] = useState<any>(null);
@@ -56,7 +54,7 @@ export default function LoyaltyBranchPage() {
     profileImage: customer.profileImage,
   };
 
-  const showNavbar = !['rewards', 'notifications'].includes(activeTab);
+  const showNavbar = !['notifications'].includes(activeTab) && !showScan;
 
   const renderPage = () => {
     switch (activeTab) {
@@ -67,33 +65,39 @@ export default function LoyaltyBranchPage() {
             banners={banners}
             config={config}
             branchName={branchInfo?.name}
-            onOpenQR={() => setShowQR(true)}
-            onOpenRewards={() => setActiveTab('rewards')}
+            onOpenQR={() => setShowScan(true)}
+            onOpenRewards={() => setActiveTab('coupons')}
             onOpenNotifications={() => setActiveTab('notifications')}
             onOpenSettings={() => setActiveTab('profile')}
+            onOpenBranches={() => setActiveTab('branches')}
+            onOpenHistory={() => setActiveTab('history')}
           />
         );
-      case 'packages':
-        return <PackagesPage packages={config?.packages || []} />;
-      case 'branches':
-        return <BranchesPage />;
-      case 'history':
-        return <HistoryPage customerId={customer.id} branchSlug={branchSlug} />;
-      case 'profile':
-        return <ProfilePage user={user} customerId={customer.id} onLogout={logout} />;
-      case 'rewards':
+      case 'coupons':
         return (
-          <RewardsPage
+          <CouponsPage
             user={user}
             templates={coupons.templates}
             myCoupons={coupons.myCoupons}
             branchSlug={branchSlug}
             customerId={customer.id}
-            onBack={() => setActiveTab('home')}
             onRefresh={() => {
               refreshPoints();
               api.getCoupons(branchSlug, customer.id).then(setCoupons).catch(() => {});
             }}
+          />
+        );
+      case 'branches':
+        return <BranchesPage />;
+      case 'history':
+        return <HistoryPage customerId={customer.id} branchSlug={branchSlug} />;
+      case 'profile':
+        return (
+          <ProfilePage
+            user={user}
+            customerId={customer.id}
+            onLogout={logout}
+            onOpenCoupons={() => setActiveTab('coupons')}
           />
         );
       case 'notifications':
@@ -108,16 +112,14 @@ export default function LoyaltyBranchPage() {
       <main>{renderPage()}</main>
 
       {showNavbar && (
-        <button
-          onClick={() => setShowQR(true)}
-          className="fixed bottom-24 right-6 z-50 gradient-red p-4 rounded-2xl shadow-lg shadow-red-600/30 active:scale-95 transition-transform"
-        >
-          <QrCode size={28} color="white" />
-        </button>
+        <BottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onScan={() => setShowScan(true)}
+        />
       )}
 
-      {showNavbar && <BottomNav activeTab={activeTab as any} setActiveTab={setActiveTab} />}
-      {showQR && <QRModal user={user} onClose={() => setShowQR(false)} />}
+      {showScan && <ScanPage user={user} onClose={() => setShowScan(false)} />}
     </>
   );
 }
