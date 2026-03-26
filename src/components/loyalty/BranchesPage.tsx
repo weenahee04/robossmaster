@@ -7,9 +7,9 @@ export default function BranchesPage() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/admin/branches`)
+    fetch('/api/branches')
       .then(r => r.json())
-      .then(data => setBranches(Array.isArray(data) ? data : data.branches || []))
+      .then(data => setBranches(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -24,7 +24,7 @@ export default function BranchesPage() {
     <div className="flex flex-col overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-[300px] bg-glow-red pointer-events-none z-0"></div>
 
-      <header className="relative z-20 pt-14 px-6 pb-4 flex items-center justify-between sticky top-0 border-b border-white/5 ios-blur" style={{ background: 'rgba(5,5,5,0.8)' }}>
+      <header className="relative z-20 pt-14 px-6 pb-4 flex items-center justify-between sticky top-0 border-b border-white/5 ios-blur bg-background-dark/80">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-white">ค้นหาสาขา</h1>
         </div>
@@ -40,10 +40,9 @@ export default function BranchesPage() {
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap ${
-                filter === f.id ? 'text-white' : 'text-gray-400 border border-white/5'
-              }`}
-              style={filter === f.id ? { background: '#f20d0d' } : { background: '#1a1a1a' }}
+              className={`text-xs font-bold rounded-full whitespace-nowrap ${
+                filter === f.id ? 'bg-primary text-white' : 'bg-surface-dark text-gray-400 border border-white/5'
+              } px-4 py-2`}
             >
               {f.label}
             </button>
@@ -53,7 +52,7 @@ export default function BranchesPage() {
         {/* Branch Cards */}
         {filtered.map((branch: any) => (
           <div key={branch.id} className="rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-gradient-branch">
-            <div className="h-44 relative" style={{ background: '#1a1a1a' }}>
+            <div className="h-44 relative bg-surface-dark">
               {branch.imageUrl ? (
                 <img alt={branch.name} className="w-full h-full object-cover" src={branch.imageUrl} />
               ) : (
@@ -82,11 +81,11 @@ export default function BranchesPage() {
               <div className="flex gap-3 mt-4">
                 {branch.phone && (
                   <a href={`tel:${branch.phone}`} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95">
-                    <span className="material-symbols-outlined text-[18px]" style={{ color: '#f20d0d' }}>call</span>
+                    <span className="material-symbols-outlined text-[18px] text-primary">call</span>
                     <span className="text-xs font-bold">โทรออก</span>
                   </a>
                 )}
-                <button className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg ${branch.isActive ? '' : 'opacity-50 cursor-not-allowed'}`} style={{ background: '#f20d0d', boxShadow: '0 10px 15px -3px rgba(242,13,13,0.2)' }} disabled={!branch.isActive}>
+                <button className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg bg-primary shadow-primary/20 ${branch.isActive ? '' : 'opacity-50 cursor-not-allowed'}`} disabled={!branch.isActive}>
                   <span className="material-symbols-outlined text-[18px] text-white">directions</span>
                   <span className="text-xs font-bold text-white">นำทาง</span>
                 </button>

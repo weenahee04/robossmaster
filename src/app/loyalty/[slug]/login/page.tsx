@@ -207,9 +207,9 @@ export default function LoyaltyLoginPage() {
             <div className="h-px bg-white/10 flex-1"></div>
           </div>
           <div className="flex gap-4 w-full">
-            <button className="flex-1 bg-[#06C755] border border-[#06C755]/30 py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#06C755]/90 transition-colors text-white font-bold text-sm">
+            <a href={`/api/loyalty/line/login?branch=${slug}`} className="flex-1 bg-[#06C755] border border-[#06C755]/30 py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#06C755]/90 transition-colors text-white font-bold text-sm">
               LINE Login
-            </button>
+            </a>
           </div>
         </div>
       </div>

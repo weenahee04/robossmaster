@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { api } from '@/lib/loyalty-api';
 
 interface CouponsPageProps {
   user: any;
@@ -13,6 +14,25 @@ interface CouponsPageProps {
 
 export default function CouponsPage({ user, templates, myCoupons, branchSlug, customerId, onRefresh }: CouponsPageProps) {
   const [tab, setTab] = useState<'available' | 'used'>('available');
+  const [redeeming, setRedeeming] = useState<string | null>(null);
+
+  const handleRedeem = async (templateId: string, pointsCost: number, name: string) => {
+    if (user.points < pointsCost) return;
+    if (!confirm(`ยืนยันแลก "${name}" ด้วย ${pointsCost} คะแนน?`)) return;
+    setRedeeming(templateId);
+    try {
+      const res = await api.redeemCoupon({ customerId, couponTemplateId: templateId, branchSlug });
+      if (res.error) {
+        alert(res.error);
+      } else {
+        alert(`แลกคูปองสำเร็จ! รหัส: ${res.code}`);
+        onRefresh();
+      }
+    } catch {
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    }
+    setRedeeming(null);
+  };
 
   const availableCoupons = myCoupons.filter((c: any) => c.status === 'ACTIVE');
   const usedCoupons = myCoupons.filter((c: any) => c.status !== 'ACTIVE');
@@ -29,14 +49,14 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
         </div>
 
         {/* Points Bar */}
-        <div className="border border-white/5 rounded-2xl p-4 flex items-center justify-between shadow-lg" style={{ background: '#121212' }}>
+        <div className="border border-white/5 rounded-2xl p-4 flex items-center justify-between shadow-lg bg-card-dark">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(242,13,13,0.1)' }}>
-              <span className="material-symbols-outlined" style={{ color: '#f20d0d' }}>database</span>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10">
+              <span className="material-symbols-outlined text-primary">database</span>
             </div>
             <div>
               <p className="text-[10px] text-gray-400 uppercase font-medium">คะแนนคงเหลือ</p>
-              <p className="text-lg font-bold text-white">{user.points.toLocaleString()} <span className="text-xs font-normal ml-1" style={{ color: '#f20d0d' }}>pts</span></p>
+              <p className="text-lg font-bold text-white">{user.points.toLocaleString()} <span className="text-xs font-normal ml-1 text-primary">pts</span></p>
             </div>
           </div>
         </div>
@@ -47,15 +67,13 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
         <div className="flex border-b border-white/10">
           <button
             onClick={() => setTab('available')}
-            className={`flex-1 pb-3 text-sm font-bold ${tab === 'available' ? 'border-b-2' : 'text-gray-500'}`}
-            style={tab === 'available' ? { color: '#f20d0d', borderColor: '#f20d0d' } : {}}
+            className={`flex-1 pb-3 text-sm font-bold ${tab === 'available' ? 'border-b-2 text-primary border-primary' : 'text-gray-500'}`}
           >
             คูปองที่ใช้ได้ ({availableCoupons.length})
           </button>
           <button
             onClick={() => setTab('used')}
-            className={`flex-1 pb-3 text-sm font-medium ${tab === 'used' ? 'border-b-2' : 'text-gray-500'}`}
-            style={tab === 'used' ? { color: '#f20d0d', borderColor: '#f20d0d' } : {}}
+            className={`flex-1 pb-3 text-sm font-medium ${tab === 'used' ? 'border-b-2 text-primary border-primary' : 'text-gray-500'}`}
           >
             คูปองที่ใช้แล้ว
           </button>
@@ -64,10 +82,10 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
 
       <main className="relative z-10 flex-1 px-6 pt-6 pb-28 overflow-y-auto scrollbar-hide space-y-4">
         {displayCoupons.length > 0 ? displayCoupons.map((coupon: any) => (
-          <div key={coupon.id} className="flex h-32 border rounded-xl overflow-hidden relative group" style={{ background: '#0f0f0f', borderColor: coupon.status === 'ACTIVE' ? 'rgba(242,13,13,0.3)' : 'rgba(255,255,255,0.1)' }}>
+          <div key={coupon.id} className={`flex h-32 border rounded-xl overflow-hidden relative group bg-card-dark ${coupon.status === 'ACTIVE' ? 'border-primary/30' : 'border-white/10'}`}>
             <div className="flex-[1.5] p-4 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-tighter" style={{ color: coupon.status === 'ACTIVE' ? '#f20d0d' : '#6b7280' }}>
+                <span className={`text-[10px] font-bold uppercase tracking-tighter ${coupon.status === 'ACTIVE' ? 'text-primary' : 'text-gray-500'}`}>
                   {coupon.template?.category || 'Reward'}
                 </span>
                 <h3 className="text-xl font-bold text-white mt-0.5">{coupon.template?.name || coupon.name || 'คูปอง'}</h3>
@@ -77,18 +95,18 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
                 {coupon.expiresAt ? `หมดอายุ: ${new Date(coupon.expiresAt).toLocaleDateString('th-TH')}` : ''}
               </div>
             </div>
-            <div className="w-px border-r border-dashed my-3" style={{ borderColor: coupon.status === 'ACTIVE' ? 'rgba(242,13,13,0.4)' : 'rgba(255,255,255,0.2)' }}></div>
-            <div className="flex-1 flex flex-col items-center justify-center p-4" style={{ background: coupon.status === 'ACTIVE' ? 'rgba(242,13,13,0.05)' : 'rgba(255,255,255,0.05)' }}>
+            <div className={`w-px border-r border-dashed my-3 ${coupon.status === 'ACTIVE' ? 'border-primary/40' : 'border-white/20'}`}></div>
+            <div className={`flex-1 flex flex-col items-center justify-center p-4 ${coupon.status === 'ACTIVE' ? 'bg-primary/5' : 'bg-white/5'}`}>
               {coupon.status === 'ACTIVE' ? (
-                <button className="w-full py-2 text-white rounded-lg text-xs font-bold transition-all shadow-lg" style={{ background: '#f20d0d', boxShadow: '0 10px 15px -3px rgba(242,13,13,0.2)' }}>
+                <button className="w-full py-2 text-white rounded-lg text-xs font-bold transition-all shadow-lg bg-primary shadow-primary/20">
                   ใช้คูปอง
                 </button>
               ) : (
                 <span className="text-xs text-gray-500 font-bold">ใช้แล้ว</span>
               )}
             </div>
-            <div className="absolute -top-3 left-[58.5%] w-6 h-6 rounded-full border" style={{ background: '#050505', borderColor: coupon.status === 'ACTIVE' ? 'rgba(242,13,13,0.3)' : 'rgba(255,255,255,0.1)' }}></div>
-            <div className="absolute -bottom-3 left-[58.5%] w-6 h-6 rounded-full border" style={{ background: '#050505', borderColor: coupon.status === 'ACTIVE' ? 'rgba(242,13,13,0.3)' : 'rgba(255,255,255,0.1)' }}></div>
+            <div className={`absolute -top-3 left-[58.5%] w-6 h-6 rounded-full border bg-background-dark ${coupon.status === 'ACTIVE' ? 'border-primary/30' : 'border-white/10'}`}></div>
+            <div className={`absolute -bottom-3 left-[58.5%] w-6 h-6 rounded-full border bg-background-dark ${coupon.status === 'ACTIVE' ? 'border-primary/30' : 'border-white/10'}`}></div>
           </div>
         )) : (
           <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
@@ -104,7 +122,7 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
           <>
             <h3 className="text-sm font-bold text-gray-400 pt-4">แลกคะแนนรับคูปอง</h3>
             {templates.map((tpl: any) => (
-              <div key={tpl.id} className="flex h-32 border border-white/10 rounded-xl overflow-hidden relative group opacity-70" style={{ background: '#0f0f0f' }}>
+              <div key={tpl.id} className="flex h-32 border border-white/10 rounded-xl overflow-hidden relative group opacity-70 bg-card-dark">
                 <div className="flex-[1.5] p-4 flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Point Exchange</span>
@@ -118,15 +136,15 @@ export default function CouponsPage({ user, templates, myCoupons, branchSlug, cu
                 <div className="w-px border-r border-dashed border-white/20 my-3"></div>
                 <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white/5">
                   <button
-                    disabled={user.points < tpl.pointsCost}
-                    className={`w-full py-2 rounded-lg text-xs font-bold ${user.points >= tpl.pointsCost ? 'text-white' : 'text-gray-400 cursor-not-allowed bg-gray-800'}`}
-                    style={user.points >= tpl.pointsCost ? { background: '#f20d0d' } : {}}
+                    disabled={user.points < tpl.pointsCost || redeeming === tpl.id}
+                    onClick={() => handleRedeem(tpl.id, tpl.pointsCost, tpl.name)}
+                    className={`w-full py-2 rounded-lg text-xs font-bold ${user.points >= tpl.pointsCost ? 'text-white bg-primary' : 'text-gray-400 cursor-not-allowed bg-gray-800'}`}
                   >
-                    แลกรับ
+                    {redeeming === tpl.id ? 'กำลังแลก...' : 'แลกรับ'}
                   </button>
                 </div>
-                <div className="absolute -top-3 left-[58.5%] w-6 h-6 rounded-full border border-white/10" style={{ background: '#050505' }}></div>
-                <div className="absolute -bottom-3 left-[58.5%] w-6 h-6 rounded-full border border-white/10" style={{ background: '#050505' }}></div>
+                <div className="absolute -top-3 left-[58.5%] w-6 h-6 rounded-full border border-white/10 bg-background-dark"></div>
+                <div className="absolute -bottom-3 left-[58.5%] w-6 h-6 rounded-full border border-white/10 bg-background-dark"></div>
               </div>
             ))}
           </>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createPayrollSchema, updatePayrollSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -34,19 +35,21 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, employeeId, month, year, baseSalary, overtimePay, deductions } = body;
+    const v = validate(createPayrollSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, employeeId, month, year, baseSalary, overtimePay, deductions } = v.data;
 
-    const totalPay = parseFloat(baseSalary || 0) + parseFloat(overtimePay || 0) - parseFloat(deductions || 0);
+    const totalPay = parseFloat(String(baseSalary || 0)) + parseFloat(String(overtimePay || 0)) - parseFloat(String(deductions || 0));
 
     const payroll = await prisma.payroll.create({
       data: {
         branchId,
         employeeId,
-        month: parseInt(month),
-        year: parseInt(year),
-        baseSalary: parseFloat(baseSalary || 0),
-        overtimePay: parseFloat(overtimePay || 0),
-        deductions: parseFloat(deductions || 0),
+        month: parseInt(String(month)),
+        year: parseInt(String(year)),
+        baseSalary: parseFloat(String(baseSalary || 0)),
+        overtimePay: parseFloat(String(overtimePay || 0)),
+        deductions: parseFloat(String(deductions || 0)),
         totalPay,
         status: "PENDING",
       },
@@ -64,7 +67,9 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, status } = body;
+    const v = validate(updatePayrollSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, status } = v.data;
 
     const data: Record<string, unknown> = { status };
     if (status === "PAID") {

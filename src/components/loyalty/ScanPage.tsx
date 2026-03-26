@@ -36,7 +36,7 @@ export default function ScanPage({ user, onClose }: ScanPageProps) {
           <div className="qr-frame-corner top-0 right-0 rounded-tr-xl border-b-0 border-l-0"></div>
           <div className="qr-frame-corner bottom-0 left-0 rounded-bl-xl border-t-0 border-r-0"></div>
           <div className="qr-frame-corner bottom-0 right-0 rounded-br-xl border-t-0 border-l-0"></div>
-          <div className="absolute inset-0 rounded-xl" style={{ background: 'rgba(242,13,13,0.05)', filter: 'blur(40px)' }}></div>
+          <div className="absolute inset-0 rounded-xl bg-primary/5 blur-[40px]"></div>
           <div className="absolute top-1/2 left-4 right-4 scanner-line animate-pulse"></div>
         </div>
         <div className="mt-10 text-center">
@@ -47,13 +47,13 @@ export default function ScanPage({ user, onClose }: ScanPageProps) {
 
       {/* Bottom Info */}
       <div className="relative z-10 px-6 pb-12">
-        <div className="rounded-2xl p-4 border border-white/10 flex items-center gap-4" style={{ background: 'rgba(26,26,26,0.8)', backdropFilter: 'blur(20px)' }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(242,13,13,0.2)' }}>
-            <span className="material-symbols-outlined" style={{ color: '#f20d0d' }}>stars</span>
+        <div className="rounded-2xl p-4 border border-white/10 flex items-center gap-4 bg-surface-dark/80 backdrop-blur-xl">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/20">
+            <span className="material-symbols-outlined text-primary">stars</span>
           </div>
           <div className="flex-1">
             <p className="text-xs text-gray-400 uppercase tracking-wider">คะแนนคงเหลือ</p>
-            <p className="text-xl font-bold text-white">{user.points.toLocaleString()} <span className="text-sm font-normal" style={{ color: '#f20d0d' }}>pts</span></p>
+            <p className="text-xl font-bold text-white">{user.points.toLocaleString()} <span className="text-sm font-normal text-primary">pts</span></p>
           </div>
           <div className="w-px h-10 bg-white/10"></div>
           <div className="text-right">

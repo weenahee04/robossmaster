@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Roboss Rich Menu — Download PNG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; background: #111; font-family: 'Noto Sans Thai', sans-serif; padding: 40px 20px;
+  }
+  h1 { color: #fff; font-size: 28px; margin-bottom: 6px; }
+  .sub { color: rgba(255,255,255,.5); font-size: 14px; margin-bottom: 24px; }
+  .actions { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+  .actions button {
+    padding: 12px 28px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px; transition: .2s;
+  }
+  .btn-dl { background: #06C755; color: #fff; }
+  .btn-dl:hover { background: #05b34c; }
+  .btn-preview { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.15) !important; }
+  .btn-preview:hover { background: rgba(255,255,255,.15); }
+  #preview { border: 1px solid rgba(255,255,255,.1); border-radius: 12px; overflow: hidden; max-width: 100%; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+
+<h1>🍔 Roboss Rich Menu</h1>
+<p class="sub">2500 × 1686 px — 6 ปุ่ม (2 แถว) พร้อมดาวน์โหลดเป็น PNG</p>
+
+<div class="actions">
+  <button class="btn-dl" onclick="downloadPNG()">⬇ ดาวน์โหลด PNG</button>
+  <button class="btn-preview" onclick="openFull()">🔍 ดูขนาดเต็ม</button>
+</div>
+
+<div id="preview"></div>
+
+<script>
+const W = 2500, H = 1686;
+const COL = 3, ROW = 2;
+const CW = W / COL, CH = H / ROW;
+
+const buttons = [
+  { label: 'สะสมแต้ม', sub: 'Earn Points', icon: 'star', grad: ['#CC0000','#ff3333'], glow: 'rgba(204,0,0,.35)' },
+  { label: 'คูปอง',    sub: 'Coupons',     icon: 'tag',  grad: ['#f59e0b','#f97316'], glow: 'rgba(245,158,11,.35)' },
+  { label: 'โปรโมชั่น', sub: 'Promotions',  icon: 'gift', grad: ['#8b5cf6','#a855f7'], glow: 'rgba(139,92,246,.35)' },
+  { label: 'สาขา',     sub: 'Branches',    icon: 'pin',  grad: ['#3b82f6','#60a5fa'], glow: 'rgba(59,130,246,.35)' },
+  { label: 'ติดต่อเรา', sub: 'Contact Us',  icon: 'phone',grad: ['#06C755','#34d399'], glow: 'rgba(6,199,85,.35)' },
+  { label: 'แชท',      sub: 'Chat',        icon: 'chat', grad: ['#14b8a6','#2dd4bf'], glow: 'rgba(20,184,166,.35)' },
+];
+
+function drawIcon(ctx, type, cx, cy, s) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = s * 0.08;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  const r = s * 0.38;
+
+  if (type === 'star') {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (Math.PI / 2 * 3) + (i * Math.PI * 2 / 5);
+      const x = Math.cos(a) * r, y = Math.sin(a) * r;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      const a2 = a + Math.PI / 5;
+      ctx.lineTo(Math.cos(a2) * r * 0.45, Math.sin(a2) * r * 0.45);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  else if (type === 'tag') {
+    const ts = r * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-ts, -ts); ctx.lineTo(ts * 0.1, -ts); ctx.lineTo(ts, -ts * 0.1);
+    ctx.lineTo(ts * 0.1, ts); ctx.lineTo(-ts, ts); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = buttons[1].grad[0];
+    ctx.beginPath(); ctx.arc(-ts * 0.4, -ts * 0.4, ts * 0.18, 0, Math.PI * 2); ctx.fill();
+  }
+  else if (type === 'gift') {
+    const bw = r * 0.9, bh = r * 0.6, th = r * 0.35;
+    ctx.fillRect(-bw, -th / 2, bw * 2, th); // ribbon
+    ctx.fillRect(-bw, th / 2, bw * 2, bh);  // box
+    ctx.fillStyle = buttons[2].grad[0];
+    ctx.fillRect(-r * 0.08, -th / 2, r * 0.16, th + bh); // vertical ribbon
+    // bow
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-r * 0.3, -th / 2 - r * 0.1, r * 0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(r * 0.3, -th / 2 - r * 0.1, r * 0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = buttons[2].grad[0];
+    ctx.beginPath(); ctx.arc(0, -th / 2 - r * 0.05, r * 0.12, 0, Math.PI * 2); ctx.fill();
+  }
+  else if (type === 'pin') {
+    ctx.beginPath();
+    ctx.moveTo(0, r);
+    ctx.bezierCurveTo(-r * 0.6, r * 0.2, -r, -r * 0.3, -r, -r * 0.5);
+    ctx.arc(0, -r * 0.5, r, Math.PI, 0, false);
+    ctx.bezierCurveTo(r, -r * 0.3, r * 0.6, r * 0.2, 0, r);
+    ctx.fill();
+    ctx.fillStyle = buttons[3].grad[0];
+    ctx.beginPath(); ctx.arc(0, -r * 0.5, r * 0.35, 0, Math.PI * 2); ctx.fill();
+  }
+  else if (type === 'phone') {
+    ctx.beginPath();
+    const pr = r * 0.85;
+    // handset shape
+    ctx.moveTo(-pr, pr * 0.3);
+    ctx.quadraticCurveTo(-pr, -pr * 0.1, -pr * 0.5, -pr * 0.5);
+    ctx.quadraticCurveTo(-pr * 0.2, -pr * 0.7, 0, -pr * 0.3);
+    ctx.quadraticCurveTo(pr * 0.2, pr * 0.1, pr * 0.3, 0);
+    ctx.quadraticCurveTo(pr * 0.7, pr * 0.2, pr * 0.5, pr * 0.5);
+    ctx.quadraticCurveTo(pr * 0.1, pr, -pr * 0.3, pr);
+    ctx.quadraticCurveTo(-pr, pr * 0.8, -pr, pr * 0.3);
+    ctx.fill();
+  }
+  else if (type === 'chat') {
+    ctx.beginPath();
+    const cw = r * 1.1, ch2 = r * 0.75;
+    ctx.moveTo(-cw, -ch2 * 0.2);
+    ctx.quadraticCurveTo(-cw, -ch2, 0, -ch2);
+    ctx.quadraticCurveTo(cw, -ch2, cw, -ch2 * 0.2);
+    ctx.quadraticCurveTo(cw, ch2 * 0.5, 0, ch2 * 0.5);
+    ctx.lineTo(-cw * 0.3, ch2);
+    ctx.lineTo(-cw * 0.2, ch2 * 0.5);
+    ctx.quadraticCurveTo(-cw, ch2 * 0.5, -cw, -ch2 * 0.2);
+    ctx.fill();
+    // dots
+    ctx.fillStyle = buttons[5].grad[0];
+    const dy = -ch2 * 0.1;
+    [-r * 0.4, 0, r * 0.4].forEach(dx => {
+      ctx.beginPath(); ctx.arc(dx, dy, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  ctx.restore();
+}
+
+function render(canvas) {
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // BG gradient
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0a0a14');
+  bg.addColorStop(0.5, '#111122');
+  bg.addColorStop(1, '#0d1b2a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Decorative circles
+  ctx.save();
+  const rg1 = ctx.createRadialGradient(W * 0.85, H * 0.15, 0, W * 0.85, H * 0.15, 500);
+  rg1.addColorStop(0, 'rgba(204,0,0,0.12)'); rg1.addColorStop(1, 'transparent');
+  ctx.fillStyle = rg1; ctx.fillRect(0, 0, W, H);
+  const rg2 = ctx.createRadialGradient(W * 0.15, H * 0.85, 0, W * 0.15, H * 0.85, 400);
+  rg2.addColorStop(0, 'rgba(59,130,246,0.08)'); rg2.addColorStop(1, 'transparent');
+  ctx.fillStyle = rg2; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.lineWidth = 2;
+  // vertical lines
+  for (let c = 1; c < COL; c++) {
+    ctx.beginPath(); ctx.moveTo(c * CW, 0); ctx.lineTo(c * CW, H); ctx.stroke();
+  }
+  // horizontal line
+  ctx.beginPath(); ctx.moveTo(0, CH); ctx.lineTo(W, CH); ctx.stroke();
+
+  // Buttons
+  buttons.forEach((btn, i) => {
+    const col = i % COL, row = Math.floor(i / COL);
+    const cx = col * CW + CW / 2;
+    const cy = row * CH + CH / 2;
+
+    // Icon circle
+    const iconR = 82;
+    const iconCy = cy - 70;
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor = btn.glow;
+    ctx.shadowBlur = 80;
+    const grad = ctx.createLinearGradient(cx - iconR, iconCy - iconR, cx + iconR, iconCy + iconR);
+    grad.addColorStop(0, btn.grad[0]); grad.addColorStop(1, btn.grad[1]);
+    ctx.fillStyle = grad;
+    roundRect(ctx, cx - iconR, iconCy - iconR, iconR * 2, iconR * 2, 32);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    // Icon
+    drawIcon(ctx, btn.icon, cx, iconCy, iconR * 1.6);
+
+    // Accent dot on first button
+    if (i === 0) {
+      ctx.save();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(cx + iconR - 8, iconCy - iconR + 8, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#0a0a14'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(cx + iconR - 8, iconCy - iconR + 8, 18, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    // Label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 52px "Noto Sans Thai", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 8;
+    ctx.fillText(btn.label, cx, iconCy + iconR + 30);
+    ctx.shadowBlur = 0;
+
+    // Sub-label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '400 30px "Noto Sans Thai", sans-serif';
+    ctx.fillText(btn.sub, cx, iconCy + iconR + 95);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadPNG() {
+  const c = document.createElement('canvas');
+  render(c);
+  const link = document.createElement('a');
+  link.download = 'roboss-rich-menu-2500x1686.png';
+  link.href = c.toDataURL('image/png');
+  link.click();
+}
+
+function openFull() {
+  const c = document.createElement('canvas');
+  render(c);
+  const url = c.toDataURL('image/png');
+  window.open(url, '_blank');
+}
+
+// Preview (scaled)
+window.addEventListener('load', () => {
+  const c = document.createElement('canvas');
+  render(c);
+  const preview = document.getElementById('preview');
+  const scale = Math.min((window.innerWidth - 80) / W, 0.4);
+  c.style.width = (W * scale) + 'px';
+  c.style.height = (H * scale) + 'px';
+  preview.appendChild(c);
+});
+</script>
+
+</body>
+</html>

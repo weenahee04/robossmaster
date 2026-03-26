@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createEmployeeSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -26,7 +27,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, name, position, phone, email, salary, startDate } = body;
+    const v = validate(createEmployeeSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, name, position, phone, email, salary, startDate } = v.data;
 
     const employee = await prisma.employee.create({
       data: {
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
         position,
         phone,
         email,
-        salary: parseFloat(salary) || 0,
+        salary: parseFloat(String(salary || 0)) || 0,
         startDate: startDate ? new Date(startDate) : null,
       },
     });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createServiceTicketSchema, updateServiceTicketSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -28,10 +29,12 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, title, description, category, priority, machineModel, images } = body;
+    const v = validate(createServiceTicketSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, title, description, category, priority, machineModel, images } = v.data;
 
     const ticket = await prisma.serviceTicket.create({
-      data: { branchId, title, description, category, priority: priority || "MEDIUM", machineModel, images },
+      data: { branchId, title, description: description ?? "", category: category ?? "", priority: priority || "MEDIUM", machineModel, images },
     });
 
     return NextResponse.json(ticket);
@@ -46,7 +49,9 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, status, comment, userId } = body;
+    const v = validate(updateServiceTicketSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, status, comment, userId } = v.data;
 
     if (status) {
       await prisma.serviceTicket.update({

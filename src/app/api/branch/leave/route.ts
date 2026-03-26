@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createLeaveRequestSchema, updateLeaveRequestSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -34,7 +35,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, employeeId, type, startDate, endDate, reason } = body;
+    const v = validate(createLeaveRequestSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, employeeId, type, startDate, endDate, reason } = v.data;
 
     const leave = await prisma.leaveRequest.create({
       data: {
@@ -59,7 +62,9 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, status, approvedById } = body;
+    const v = validate(updateLeaveRequestSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, status, approvedById } = v.data;
 
     const leave = await prisma.leaveRequest.update({
       where: { id },

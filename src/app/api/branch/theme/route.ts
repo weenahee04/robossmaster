@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, updateThemeSchema } from "@/lib/validations";
 
 // GET — get branch theme
 export async function GET(request: NextRequest) {
@@ -25,8 +26,9 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, ...data } = body;
-    if (!branchId) return NextResponse.json({ error: "Missing branchId" }, { status: 400 });
+    const v = validate(updateThemeSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, ...data } = v.data;
 
     const theme = await prisma.branchTheme.upsert({
       where: { branchId },

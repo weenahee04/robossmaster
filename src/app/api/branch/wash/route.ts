@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createWashRecordSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -88,7 +89,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, packageId, vehicleType, amount, note, createdById, packageName } = body;
+    const v = validate(createWashRecordSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, packageId, vehicleType, amount, note, createdById, packageName } = v.data;
 
     const record = await prisma.washRecord.create({
       data: {
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
         globalPackageId: packageId,
         vehicleType,
         packageName: packageName || null,
-        amount: parseFloat(amount),
+        amount: parseFloat(String(amount)),
         note,
         createdById,
       },

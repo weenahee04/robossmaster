@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api-auth";
+import { validate, createBannerSchema, updateBannerSchema } from "@/lib/validations";
 
 // GET — list all banners
 export async function GET(req: NextRequest) {
@@ -23,13 +24,15 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { title, imageUrl, linkUrl, sortOrder } = body;
+    const v = validate(createBannerSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { title, imageUrl, linkUrl, sortOrder } = v.data;
     const banner = await prisma.banner.create({
       data: {
         title,
         imageUrl,
         linkUrl: linkUrl || null,
-        sortOrder: sortOrder ? parseInt(sortOrder) : 0,
+        sortOrder: sortOrder ? parseInt(String(sortOrder)) : 0,
       },
     });
     return NextResponse.json(banner);
@@ -45,10 +48,11 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, ...data } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
-    if (data.sortOrder !== undefined) data.sortOrder = parseInt(data.sortOrder);
+    const v = validate(updateBannerSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, ...rest } = v.data;
+    const data: any = { ...rest };
+    if (data.sortOrder !== undefined) data.sortOrder = parseInt(String(data.sortOrder));
 
     const banner = await prisma.banner.update({ where: { id }, data });
     return NextResponse.json(banner);

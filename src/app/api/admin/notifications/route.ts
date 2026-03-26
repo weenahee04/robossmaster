@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api-auth";
+import { validate, createNotificationSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdmin(req);
@@ -27,7 +28,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, type, title, message } = body;
+    const v = validate(createNotificationSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, type, title, message } = v.data;
 
     if (branchId === "ALL") {
       const branches = await prisma.branch.findMany({ where: { isActive: true }, select: { id: true } });

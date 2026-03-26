@@ -20,6 +20,9 @@ interface Branch {
   email: string | null;
   isActive: boolean;
   createdAt: string;
+  lineChannelId: string | null;
+  lineChannelSecret: string | null;
+  lineOaId: string | null;
   bankAccount: {
     bankName: string;
     bankBranch: string;
@@ -64,6 +67,36 @@ export default function AdminBranchesPage() {
   });
   const [editBranch, setEditBranch] = useState<Branch | null>(null);
   const [toggling, setToggling] = useState("");
+  const [showLineSettings, setShowLineSettings] = useState(false);
+  const [lineBranch, setLineBranch] = useState<Branch | null>(null);
+  const [lineForm, setLineForm] = useState({ lineChannelId: "", lineChannelSecret: "", lineOaId: "" });
+  const [savingLine, setSavingLine] = useState(false);
+
+  const openLineSettings = (branch: Branch) => {
+    setLineBranch(branch);
+    setLineForm({
+      lineChannelId: branch.lineChannelId || "",
+      lineChannelSecret: branch.lineChannelSecret || "",
+      lineOaId: branch.lineOaId || "",
+    });
+    setShowLineSettings(true);
+  };
+
+  const handleSaveLine = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!lineBranch) return;
+    setSavingLine(true);
+    try {
+      await fetch("/api/admin/branches", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: lineBranch.id, ...lineForm }),
+      });
+      fetchBranches();
+      setShowLineSettings(false);
+    } catch { console.error("Save LINE error"); }
+    finally { setSavingLine(false); }
+  };
 
   const bankOptions = [
     "กสิกรไทย",
@@ -228,6 +261,14 @@ export default function AdminBranchesPage() {
                   }
                 >
                   คัดลอกลิงก์
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon="chat"
+                  onClick={() => openLineSettings(branch)}
+                >
+                  LINE
                 </Button>
                 <Button
                   variant={branch.isActive ? "danger" : "success"}
@@ -409,6 +450,83 @@ export default function AdminBranchesPage() {
             </Button>
             <Button type="submit" icon="add" isLoading={creating}>
               ลงทะเบียนสาขา
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* LINE Settings Modal */}
+      <Modal
+        isOpen={showLineSettings}
+        onClose={() => setShowLineSettings(false)}
+        title={`ตั้งค่า LINE Login — ${lineBranch?.name || ""}`}
+        maxWidth="md"
+      >
+        <form onSubmit={handleSaveLine} className="space-y-4">
+          <div className="bg-blue-50 rounded-lg p-4">
+            <p className="text-sm text-blue-800 flex items-start gap-2">
+              <span className="material-symbols-outlined text-[18px] mt-0.5">info</span>
+              กรอก LINE Login Channel credentials จาก LINE Developers Console เพื่อเปิดใช้งาน LINE Login สำหรับสาขานี้
+            </p>
+          </div>
+          <Input
+            label="LINE Channel ID"
+            value={lineForm.lineChannelId}
+            onChange={(e) => setLineForm({ ...lineForm, lineChannelId: e.target.value })}
+            placeholder="เช่น 1234567890"
+          />
+          <Input
+            label="LINE Channel Secret"
+            value={lineForm.lineChannelSecret}
+            onChange={(e) => setLineForm({ ...lineForm, lineChannelSecret: e.target.value })}
+            placeholder="เช่น abcdef1234567890"
+          />
+          <Input
+            label="LINE OA ID (optional)"
+            value={lineForm.lineOaId}
+            onChange={(e) => setLineForm({ ...lineForm, lineOaId: e.target.value })}
+            placeholder="เช่น @roboss-rama9"
+          />
+          {lineBranch && (
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                Callback URL (ใส่ใน LINE Developers Console)
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="text-xs text-primary font-mono flex-1 break-all">
+                  {typeof window !== "undefined" ? window.location.origin : ""}/api/loyalty/line/callback
+                </code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(`${window.location.origin}/api/loyalty/line/callback`)}
+                  className="p-1.5 rounded-lg hover:bg-slate-200 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-slate-500">content_copy</span>
+                </button>
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 mt-3">
+                Rich Menu URL (ใส่ใน Rich Menu ปุ่มสะสมแต้ม)
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="text-xs text-primary font-mono flex-1 break-all">
+                  {typeof window !== "undefined" ? window.location.origin : ""}/api/loyalty/line/login?branch={lineBranch.slug}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(`${window.location.origin}/api/loyalty/line/login?branch=${lineBranch.slug}`)}
+                  className="p-1.5 rounded-lg hover:bg-slate-200 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-slate-500">content_copy</span>
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" type="button" onClick={() => setShowLineSettings(false)}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" icon="save" isLoading={savingLine}>
+              บันทึก
             </Button>
           </div>
         </form>

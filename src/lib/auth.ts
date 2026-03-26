@@ -3,10 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 
-const secret = process.env.NEXTAUTH_SECRET;
-if (!secret && process.env.NODE_ENV === "production") {
-  throw new Error("NEXTAUTH_SECRET is required in production");
-}
+const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

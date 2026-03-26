@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   try {
     const branches = await prisma.branch.findMany({
-      select: { id: true, name: true, slug: true, isActive: true },
+      select: { id: true, name: true, slug: true, isActive: true, address: true, phone: true, latitude: true, longitude: true },
       orderBy: { name: "asc" },
     });
     return NextResponse.json(branches);

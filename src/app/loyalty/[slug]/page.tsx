@@ -6,14 +6,19 @@ import { useAuth } from '@/lib/loyalty-auth-context';
 import { api } from '@/lib/loyalty-api';
 import HomePage from '@/components/loyalty/HomePage';
 import BranchesPage from '@/components/loyalty/BranchesPage';
+import BranchDetailPage from '@/components/loyalty/BranchDetailPage';
+import BranchMapPage from '@/components/loyalty/BranchMapPage';
+import GeoMapPage from '@/components/loyalty/GeoMapPage';
 import HistoryPage from '@/components/loyalty/HistoryPage';
 import ProfilePage from '@/components/loyalty/ProfilePage';
 import CouponsPage from '@/components/loyalty/CouponsPage';
 import NotificationsPage from '@/components/loyalty/NotificationsPage';
+import PromoDetailPage from '@/components/loyalty/PromoDetailPage';
+import SettingsPage from '@/components/loyalty/SettingsPage';
 import ScanPage from '@/components/loyalty/ScanPage';
 import BottomNav from '@/components/loyalty/BottomNav';
 
-type Tab = 'home' | 'coupons' | 'branches' | 'history' | 'profile' | 'notifications';
+type Tab = 'home' | 'coupons' | 'branches' | 'branchDetail' | 'branchMap' | 'geoMap' | 'history' | 'profile' | 'notifications' | 'promoDetail' | 'settings';
 
 export default function LoyaltyBranchPage() {
   const router = useRouter();
@@ -23,6 +28,8 @@ export default function LoyaltyBranchPage() {
   const [coupons, setCoupons] = useState<any>({ templates: [], myCoupons: [] });
   const [banners, setBanners] = useState<any[]>([]);
   const [config, setConfig] = useState<any>(null);
+  const [selectedBranch, setSelectedBranch] = useState<any>(null);
+  const [selectedPromo, setSelectedPromo] = useState<any>(null);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -54,7 +61,8 @@ export default function LoyaltyBranchPage() {
     profileImage: customer.profileImage,
   };
 
-  const showNavbar = !['notifications'].includes(activeTab) && !showScan;
+  const fullScreenPages: Tab[] = ['notifications', 'branchDetail', 'branchMap', 'geoMap', 'promoDetail', 'settings'];
+  const showNavbar = !fullScreenPages.includes(activeTab) && !showScan;
 
   const renderPage = () => {
     switch (activeTab) {
@@ -68,9 +76,14 @@ export default function LoyaltyBranchPage() {
             onOpenQR={() => setShowScan(true)}
             onOpenRewards={() => setActiveTab('coupons')}
             onOpenNotifications={() => setActiveTab('notifications')}
-            onOpenSettings={() => setActiveTab('profile')}
+            onOpenSettings={() => setActiveTab('settings')}
             onOpenBranches={() => setActiveTab('branches')}
             onOpenHistory={() => setActiveTab('history')}
+            onOpenPromo={(id: string) => {
+              const banner = banners.find(b => b.id === id);
+              setSelectedPromo(banner);
+              setActiveTab('promoDetail');
+            }}
           />
         );
       case 'coupons':
@@ -89,6 +102,28 @@ export default function LoyaltyBranchPage() {
         );
       case 'branches':
         return <BranchesPage />;
+      case 'branchDetail':
+        return (
+          <BranchDetailPage
+            branch={selectedBranch}
+            onBack={() => setActiveTab('branches')}
+            onOpenGeoMap={() => setActiveTab('geoMap')}
+          />
+        );
+      case 'branchMap':
+        return (
+          <BranchMapPage
+            onBack={() => setActiveTab('branches')}
+            onOpenGeoMap={() => setActiveTab('geoMap')}
+          />
+        );
+      case 'geoMap':
+        return (
+          <GeoMapPage
+            branch={selectedBranch}
+            onBack={() => setActiveTab('branches')}
+          />
+        );
       case 'history':
         return <HistoryPage customerId={customer.id} branchSlug={branchSlug} />;
       case 'profile':
@@ -98,10 +133,21 @@ export default function LoyaltyBranchPage() {
             customerId={customer.id}
             onLogout={logout}
             onOpenCoupons={() => setActiveTab('coupons')}
+            onOpenSettings={() => setActiveTab('settings')}
           />
         );
       case 'notifications':
         return <NotificationsPage onBack={() => setActiveTab('home')} />;
+      case 'promoDetail':
+        return (
+          <PromoDetailPage
+            promo={selectedPromo}
+            onBack={() => setActiveTab('home')}
+            onOpenBranches={() => setActiveTab('branches')}
+          />
+        );
+      case 'settings':
+        return <SettingsPage onBack={() => setActiveTab('profile')} />;
       default:
         return null;
     }

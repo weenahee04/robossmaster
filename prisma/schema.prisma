@@ -71,6 +71,10 @@ model Branch {
   customerCoupons      CustomerCoupon[]
   loyaltyBanners       LoyaltyBanner[]
   theme                BranchTheme?
+  lineChannelId        String?
+  lineChannelSecret    String?
+  lineOaId             String?
+  customerLineAccounts CustomerLineAccount[]
 }
 
 // ===== Bank Account =====
@@ -402,7 +406,7 @@ model Customer {
   id           String   @id @default(cuid())
   phone        String   @unique
   name         String?
-  lineId       String?  @unique
+  lineId       String?
   profileImage String?  @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -411,6 +415,7 @@ model Customer {
   coupons           CustomerCoupon[]
   pointTransactions PointTransaction[]
   vehicles          Vehicle[]
+  lineAccounts      CustomerLineAccount[]
 }
 
 model Vehicle {
@@ -536,4 +541,19 @@ model MaintenanceSchedule {
   nextDueAt   DateTime?
   status      String        @default("PENDING") // PENDING | DONE | OVERDUE
   createdAt   DateTime      @default(now())
+}
+
+// ===== LINE Login Mapping =====
+
+model CustomerLineAccount {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  branchId   String
+  branch     Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  lineUserId String
+  createdAt  DateTime @default(now())
+
+  @@unique([branchId, lineUserId])
+  @@unique([customerId, branchId])
 }

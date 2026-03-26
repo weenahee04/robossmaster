@@ -97,6 +97,30 @@ export function AuthProvider({
   }, [slug]);
 
   useEffect(() => {
+    // Check for LINE login callback
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const lineLogin = params.get('lineLogin');
+      if (lineLogin) {
+        try {
+          // Read customer data from cookie set by callback
+          const cookieMatch = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('line_customer_data='));
+          if (cookieMatch) {
+            const cookieValue = decodeURIComponent(cookieMatch.split('=').slice(1).join('='));
+            const parsed = JSON.parse(cookieValue);
+            setCustomer(parsed);
+            // Delete the cookie after consuming
+            document.cookie = `line_customer_data=; path=/loyalty/${slug}; max-age=0`;
+          }
+          // Clean URL
+          window.history.replaceState({}, '', window.location.pathname);
+          return;
+        } catch {}
+      }
+    }
+
     const saved = localStorage.getItem(`roboss-loyalty-${slug}`);
     if (saved) {
       try {

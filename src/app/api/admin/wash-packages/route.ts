@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api-auth";
+import { validate, createWashPackageSchema, updateWashPackageSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdmin(req);
@@ -21,10 +22,12 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { name, type, price } = body;
+    const v = validate(createWashPackageSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { name, type, price } = v.data;
 
     const pkg = await prisma.globalWashPackage.create({
-      data: { name, type, price: parseFloat(price) },
+      data: { name, type, price: parseFloat(String(price)) },
     });
     return NextResponse.json(pkg);
   } catch (error) {
@@ -38,11 +41,13 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, name, type, price, isActive } = body;
+    const v = validate(updateWashPackageSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, name, type, price, isActive } = v.data;
 
     const pkg = await prisma.globalWashPackage.update({
       where: { id },
-      data: { name, type, price: price !== undefined ? parseFloat(price) : undefined, isActive },
+      data: { name, type, price: price !== undefined ? parseFloat(String(price)) : undefined, isActive },
     });
     return NextResponse.json(pkg);
   } catch (error) {

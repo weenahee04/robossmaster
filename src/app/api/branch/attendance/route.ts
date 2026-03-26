@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { validate, createAttendanceSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -35,7 +36,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { branchId, employeeId, date, checkIn, checkOut, status } = body;
+    const v = validate(createAttendanceSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { branchId, employeeId, date, checkIn, checkOut, status } = v.data;
 
     const checkInDate = checkIn ? new Date(`${date}T${checkIn}`) : null;
     const checkOutDate = checkOut ? new Date(`${date}T${checkOut}`) : null;

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { generateSlug, generatePassword } from "@/lib/utils";
 import { requireAdmin } from "@/lib/api-auth";
+import { encrypt } from "@/lib/encryption";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdmin(req);
@@ -122,11 +123,17 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, isActive } = body;
+    const { id, isActive, lineChannelId, lineChannelSecret, lineOaId } = body;
+
+    const data: any = {};
+    if (isActive !== undefined) data.isActive = isActive;
+    if (lineChannelId !== undefined) data.lineChannelId = lineChannelId || null;
+    if (lineChannelSecret !== undefined) data.lineChannelSecret = lineChannelSecret ? encrypt(lineChannelSecret) : null;
+    if (lineOaId !== undefined) data.lineOaId = lineOaId || null;
 
     const branch = await prisma.branch.update({
       where: { id },
-      data: { isActive },
+      data,
     });
 
     return NextResponse.json(branch);
@@ -144,6 +151,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
+    await prisma.customerLineAccount.deleteMany({ where: { branchId: id } });
     await prisma.bankAccount.deleteMany({ where: { branchId: id } });
     await prisma.user.deleteMany({ where: { branchId: id } });
     await prisma.branch.delete({ where: { id } });

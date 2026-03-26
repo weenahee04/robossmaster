@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import Sidebar, { SidebarItem } from "@/components/ui/Sidebar";
+import Sidebar, { SidebarGroup } from "@/components/ui/Sidebar";
 import Header from "@/components/ui/Header";
 
 export default function BranchLayout({
@@ -31,27 +31,69 @@ export default function BranchLayout({
       .catch(console.error);
   }, []);
 
-  const branchMenuItems: SidebarItem[] = [
-    { label: "แดชบอร์ด", icon: "dashboard", href: `/branch/${slug}/dashboard` },
-    { label: "บันทึก Wash", icon: "local_car_wash", href: `/branch/${slug}/wash` },
-    { label: "แพ็คเกจสาขา", icon: "inventory_2", href: `/branch/${slug}/wash-packages` },
-    { label: "รายรับ", icon: "trending_up", href: `/branch/${slug}/income` },
-    { label: "รายจ่าย", icon: "trending_down", href: `/branch/${slug}/expense` },
-    { label: "รายงาน", icon: "assessment", href: `/branch/${slug}/reports` },
-    { label: "ROI & คืนทุน", icon: "savings", href: `/branch/${slug}/roi` },
-    { label: "แจ้งเตือน", icon: "notifications", href: `/branch/${slug}/notifications` },
-    { label: "แจ้งซ่อม", icon: "build", href: `/branch/${slug}/service` },
-    { label: "SOP", icon: "menu_book", href: `/branch/${slug}/sop` },
-    { label: "คู่มือเครื่อง", icon: "precision_manufacturing", href: `/branch/${slug}/manuals` },
-    { label: "พนักงาน", icon: "group", href: `/branch/${slug}/hr/employees` },
-    { label: "ลงเวลา", icon: "schedule", href: `/branch/${slug}/hr/attendance` },
-    { label: "เงินเดือน", icon: "payments", href: `/branch/${slug}/hr/payroll` },
-    { label: "ลางาน", icon: "event_busy", href: `/branch/${slug}/hr/leave` },
-    { label: "ลิงก์ Loyalty", icon: "qr_code_2", href: `/branch/${slug}/loyalty-link` },
-    { label: "แบนเนอร์ Loyalty", icon: "image", href: `/branch/${slug}/loyalty-banners` },
-    { label: "สแกนคูปอง", icon: "qr_code_scanner", href: `/branch/${slug}/loyalty-scan` },
-    { label: "ตั้งค่า Theme", icon: "palette", href: `/branch/${slug}/theme` },
-  ];
+  const branchMenuGroups: SidebarGroup[] = useMemo(() => [
+    {
+      title: "ภาพรวม",
+      icon: "dashboard",
+      items: [
+        { label: "แดชบอร์ด", icon: "dashboard", href: `/branch/${slug}/dashboard` },
+      ],
+    },
+    {
+      title: "งานล้างรถ",
+      icon: "local_car_wash",
+      items: [
+        { label: "บันทึก Wash", icon: "local_car_wash", href: `/branch/${slug}/wash` },
+        { label: "แพ็คเกจสาขา", icon: "inventory_2", href: `/branch/${slug}/wash-packages` },
+      ],
+    },
+    {
+      title: "การเงิน",
+      icon: "account_balance",
+      items: [
+        { label: "รายรับ", icon: "trending_up", href: `/branch/${slug}/income` },
+        { label: "รายจ่าย", icon: "trending_down", href: `/branch/${slug}/expense` },
+        { label: "รายงาน", icon: "assessment", href: `/branch/${slug}/reports` },
+        { label: "ROI & คืนทุน", icon: "savings", href: `/branch/${slug}/roi` },
+      ],
+    },
+    {
+      title: "บุคลากร",
+      icon: "badge",
+      items: [
+        { label: "พนักงาน", icon: "group", href: `/branch/${slug}/hr/employees` },
+        { label: "ลงเวลา", icon: "schedule", href: `/branch/${slug}/hr/attendance` },
+        { label: "เงินเดือน", icon: "payments", href: `/branch/${slug}/hr/payroll` },
+        { label: "ลางาน", icon: "event_busy", href: `/branch/${slug}/hr/leave` },
+      ],
+    },
+    {
+      title: "Loyalty",
+      icon: "loyalty",
+      items: [
+        { label: "ลิงก์ Loyalty", icon: "qr_code_2", href: `/branch/${slug}/loyalty-link` },
+        { label: "แบนเนอร์ Loyalty", icon: "image", href: `/branch/${slug}/loyalty-banners` },
+        { label: "สแกนคูปอง", icon: "qr_code_scanner", href: `/branch/${slug}/loyalty-scan` },
+      ],
+    },
+    {
+      title: "อุปกรณ์",
+      icon: "build",
+      items: [
+        { label: "แจ้งซ่อม", icon: "build", href: `/branch/${slug}/service` },
+        { label: "SOP", icon: "menu_book", href: `/branch/${slug}/sop` },
+        { label: "คู่มือเครื่อง", icon: "precision_manufacturing", href: `/branch/${slug}/manuals` },
+      ],
+    },
+    {
+      title: "ตั้งค่า",
+      icon: "settings",
+      items: [
+        { label: "ตั้งค่า Theme", icon: "palette", href: `/branch/${slug}/theme` },
+        { label: "แจ้งเตือน", icon: "notifications", href: `/branch/${slug}/notifications` },
+      ],
+    },
+  ], [slug]);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -64,7 +106,7 @@ export default function BranchLayout({
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onLogout={handleLogout}
-        items={branchMenuItems}
+        groups={branchMenuGroups}
         brandName={brandName}
         brandSub={session?.user?.branchName || slug}
         logoUrl={logoUrl}

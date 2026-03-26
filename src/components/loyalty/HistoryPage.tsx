@@ -49,10 +49,9 @@ export default function HistoryPage({ customerId, branchSlug }: HistoryPageProps
               onClick={() => setFilter(f.id)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                 filter === f.id
-                  ? 'text-white'
-                  : 'border border-white/5 text-gray-400'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-dark border border-white/5 text-gray-400'
               }`}
-              style={filter === f.id ? { background: '#f20d0d' } : { background: '#1a1a1a' }}
             >
               {f.label}
             </button>
@@ -62,11 +61,11 @@ export default function HistoryPage({ customerId, branchSlug }: HistoryPageProps
         {/* Transaction List */}
         <div className="space-y-4">
           {filtered.length > 0 ? filtered.map((item: any) => (
-            <div key={item.id} className="border border-white/5 rounded-2xl p-4 shadow-xl active:scale-[0.98] transition-transform" style={{ background: '#1a1a1a' }}>
+            <div key={item.id} className="bg-surface-dark border border-white/5 rounded-2xl p-4 shadow-xl active:scale-[0.98] transition-transform">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center border border-white/5">
-                    <span className="material-symbols-outlined" style={{ color: '#f20d0d' }}>{getIcon(item)}</span>
+                    <span className="material-symbols-outlined text-primary">{getIcon(item)}</span>
                   </div>
                   <div>
                     <h3 className="text-white font-bold">{item.description || (item.type === 'EARN' ? 'ได้รับคะแนน' : 'แลกคะแนน')}</h3>
@@ -75,7 +74,7 @@ export default function HistoryPage({ customerId, branchSlug }: HistoryPageProps
                 </div>
                 <div className={`text-[10px] font-bold px-2 py-1 rounded-full border ${
                   item.amount > 0
-                    ? 'bg-[#f20d0d]/20 text-[#f20d0d] border-[#f20d0d]/30'
+                    ? 'bg-primary/20 text-primary border-primary/30'
                     : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
                 }`}>
                   {item.amount > 0 ? '+' : ''}{item.amount} pts

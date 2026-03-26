@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/api-auth";
+import { validate, createUserSchema, updateUserSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdmin(req);
@@ -35,7 +36,9 @@ export async function POST(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { name, email, phone, password, role, branchId } = body;
+    const v = validate(createUserSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { name, email, phone, password, role, branchId } = v.data;
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
@@ -64,7 +67,9 @@ export async function PATCH(request: NextRequest) {
   if (authError) return authError;
   try {
     const body = await request.json();
-    const { id, name, email, phone, role, branchId, password } = body;
+    const v = validate(updateUserSchema, body);
+    if (!v.success) return NextResponse.json({ error: v.error }, { status: 400 });
+    const { id, name, email, phone, role, branchId, password } = v.data;
 
     const data: any = { name, email, phone: phone || null, role, branchId: branchId || null };
     if (password) {

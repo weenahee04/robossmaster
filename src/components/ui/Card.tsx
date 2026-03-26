@@ -11,6 +11,7 @@ export interface CardProps {
   noPadding?: boolean;
   children: React.ReactNode;
   className?: string;
+  variant?: "light" | "dark";
 }
 
 export default function Card({
@@ -21,20 +22,35 @@ export default function Card({
   noPadding = false,
   children,
   className,
+  variant = "light",
 }: CardProps) {
+  const dark = variant === "dark";
+
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-slate-200 shadow-sm",
+        "rounded-xl border shadow-sm",
+        dark
+          ? "bg-[#111111] border-white/[0.06]"
+          : "bg-white border-slate-200",
         className
       )}
     >
       {(title || action) && (
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100">
+        <div className={cn(
+          "flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b",
+          dark ? "border-white/[0.06]" : "border-slate-100"
+        )}>
           {title && (
             <div>
-              <h3 className="font-bold text-slate-800 text-sm sm:text-base">{title}</h3>
-              {subtitle && <p className="text-[11px] text-slate-400 mt-0.5">{subtitle}</p>}
+              <h3 className={cn(
+                "font-bold text-sm sm:text-base",
+                dark ? "text-white" : "text-slate-800"
+              )}>{title}</h3>
+              {subtitle && <p className={cn(
+                "text-[11px] mt-0.5",
+                dark ? "text-gray-500" : "text-slate-400"
+              )}>{subtitle}</p>}
             </div>
           )}
           {action && <div>{action}</div>}
@@ -42,7 +58,10 @@ export default function Card({
       )}
       <div className={cn(!noPadding && "p-4 sm:p-6")}>{children}</div>
       {footer && (
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">
+        <div className={cn(
+          "px-4 sm:px-6 py-3 sm:py-4 border-t rounded-b-xl",
+          dark ? "border-white/[0.06] bg-white/[0.02]" : "border-slate-100 bg-slate-50/50"
+        )}>
           {footer}
         </div>
       )}
