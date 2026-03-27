@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+
 interface GeoMapPageProps {
   branch?: any;
   onBack: () => void;
@@ -14,6 +16,11 @@ export default function GeoMapPage({ branch, onBack }: GeoMapPageProps) {
     imageUrl: '',
     phone: '',
   };
+
+  const openGoogleMaps = useCallback(() => {
+    const query = encodeURIComponent(b.address || b.name || 'Roboss');
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  }, [b.address, b.name]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -43,30 +50,28 @@ export default function GeoMapPage({ branch, onBack }: GeoMapPageProps) {
       </div>
 
       <div className="relative z-20 px-4 pt-14">
-        <div className="glass-morphism rounded-2xl p-1 flex items-center gap-3 pr-4">
-          <div className="w-10 h-10 flex items-center justify-center">
-            <span className="material-symbols-outlined text-gray-400">search</span>
-          </div>
-          <input className="bg-transparent border-none text-white text-sm focus:outline-none focus:ring-0 w-full placeholder:text-gray-500" placeholder="ค้นหาสาขา Roboss..." type="text" />
-          <button className="text-gray-400">
-            <span className="material-symbols-outlined">tune</span>
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={onBack}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform shrink-0"
+          >
+            <span className="material-symbols-outlined text-white">chevron_left</span>
           </button>
-        </div>
-
-        <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-hide">
-          <button className="whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white text-xs font-bold shadow-lg shadow-primary/20">ทั้งหมด</button>
-          <button className="whitespace-nowrap px-4 py-2 rounded-full glass-morphism text-gray-300 text-xs font-medium border border-white/5">ใกล้คุณ</button>
-          <button className="whitespace-nowrap px-4 py-2 rounded-full glass-morphism text-gray-300 text-xs font-medium border border-white/5">เปิด 24 ชม.</button>
-          <button className="whitespace-nowrap px-4 py-2 rounded-full glass-morphism text-gray-300 text-xs font-medium border border-white/5">ล้างด่วน</button>
+          <div className="flex-1 glass-morphism rounded-2xl p-1 flex items-center gap-3 pr-4">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <span className="material-symbols-outlined text-gray-400">search</span>
+            </div>
+            <input className="bg-transparent border-none text-white text-sm focus:outline-none focus:ring-0 w-full placeholder:text-gray-500" placeholder="ค้นหาสาขา Roboss..." type="text" readOnly />
+          </div>
         </div>
       </div>
 
       <div className="absolute right-4 bottom-72 z-20 flex flex-col gap-3">
-        <button className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center text-white shadow-xl">
+        <button
+          onClick={openGoogleMaps}
+          className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform"
+        >
           <span className="material-symbols-outlined">my_location</span>
-        </button>
-        <button className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center text-white shadow-xl">
-          <span className="material-symbols-outlined">layers</span>
         </button>
       </div>
 
@@ -94,11 +99,7 @@ export default function GeoMapPage({ branch, onBack }: GeoMapPageProps) {
               <div className="flex items-center gap-4 mt-3">
                 <div className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-primary text-sm">near_me</span>
-                  <span className="text-xs text-white font-medium">{b.distance || '1.2 กม.'}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-yellow-500 text-sm">traffic</span>
-                  <span className="text-xs text-white font-medium">การจราจร: ปานกลาง</span>
+                  <span className="text-xs text-white font-medium">{b.distance || '–'}</span>
                 </div>
               </div>
             </div>
@@ -115,7 +116,10 @@ export default function GeoMapPage({ branch, onBack }: GeoMapPageProps) {
                 <span className="text-sm font-semibold text-gray-200">โทร</span>
               </div>
             )}
-            <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark shadow-lg shadow-primary/20 transition-all active:scale-95">
+            <button
+              onClick={openGoogleMaps}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark shadow-lg shadow-primary/20 transition-all active:scale-95"
+            >
               <span className="material-symbols-outlined text-white">directions</span>
               <span className="text-sm font-bold text-white">นำทาง</span>
             </button>

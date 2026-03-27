@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET — get vehicles for a customer
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -10,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     const vehicles = await prisma.vehicle.findMany({
       where: { customerId },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isPrimary: "desc" }, { createdAt: "desc" }],
     });
 
     return NextResponse.json(vehicles);
@@ -20,18 +19,32 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST — add a vehicle
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerId, make, model, licensePlate } = body;
+    const { customerId, make, model, color, year, licensePlate, isPrimary } = body;
 
     if (!customerId || !make || !licensePlate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    if (isPrimary) {
+      await prisma.vehicle.updateMany({
+        where: { customerId },
+        data: { isPrimary: false },
+      });
+    }
+
     const vehicle = await prisma.vehicle.create({
-      data: { customerId, make, model: model || null, licensePlate },
+      data: {
+        customerId,
+        make,
+        model: model || null,
+        color: color || null,
+        year: year || null,
+        licensePlate,
+        isPrimary: isPrimary ?? false,
+      },
     });
 
     return NextResponse.json(vehicle);
@@ -41,7 +54,38 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE — remove a vehicle
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, make, model, color, year, licensePlate, isPrimary } = body;
+
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    if (isPrimary) {
+      const existing = await prisma.vehicle.findUnique({ where: { id } });
+      if (!existing) return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
+      await prisma.vehicle.updateMany({
+        where: { customerId: existing.customerId },
+        data: { isPrimary: false },
+      });
+    }
+
+    const data: Record<string, unknown> = {};
+    if (make !== undefined) data.make = make;
+    if (model !== undefined) data.model = model;
+    if (color !== undefined) data.color = color;
+    if (year !== undefined) data.year = year;
+    if (licensePlate !== undefined) data.licensePlate = licensePlate;
+    if (isPrimary !== undefined) data.isPrimary = isPrimary;
+
+    const vehicle = await prisma.vehicle.update({ where: { id }, data });
+    return NextResponse.json(vehicle);
+  } catch (error) {
+    console.error("Vehicles PATCH error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

@@ -424,7 +424,10 @@ model Vehicle {
   customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   make         String
   model        String?
+  color        String?
+  year         String?
   licensePlate String
+  isPrimary    Boolean  @default(false)
   createdAt    DateTime @default(now())
 }
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+
 interface BranchDetailPageProps {
   branch?: any;
   onBack: () => void;
@@ -16,6 +18,28 @@ export default function BranchDetailPage({ branch, onBack, onOpenGeoMap }: Branc
     openHours: 'ทุกวัน: 09:00 - 20:00 น.',
   };
 
+  const openGoogleMaps = useCallback(() => {
+    const query = encodeURIComponent(b.address || b.name || 'Roboss');
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  }, [b.address, b.name]);
+
+  const handleShare = useCallback(async () => {
+    const shareData = {
+      title: b.name,
+      text: `${b.name} — ${b.address}`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${b.name}\n${b.address}\n${window.location.href}`);
+      }
+    } catch {
+      // user cancelled share
+    }
+  }, [b.name, b.address]);
+
   return (
     <div className="flex flex-col overflow-hidden">
       <div className="relative h-72 w-full shrink-0">
@@ -31,8 +55,8 @@ export default function BranchDetailPage({ branch, onBack, onOpenGeoMap }: Branc
           <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform">
             <span className="material-symbols-outlined text-white">chevron_left</span>
           </button>
-          <button className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform">
-            <span className="material-symbols-outlined text-white">favorite</span>
+          <button onClick={handleShare} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform">
+            <span className="material-symbols-outlined text-white">share</span>
           </button>
         </div>
       </div>
@@ -42,20 +66,14 @@ export default function BranchDetailPage({ branch, onBack, onOpenGeoMap }: Branc
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-2xl font-bold text-white mb-2">{b.name}</h1>
-              <div className="flex items-center gap-2">
-                <div className="flex text-primary">
-                  <span className="material-symbols-outlined text-sm fill-1">star</span>
-                  <span className="material-symbols-outlined text-sm fill-1">star</span>
-                  <span className="material-symbols-outlined text-sm fill-1">star</span>
-                  <span className="material-symbols-outlined text-sm fill-1">star</span>
-                  <span className="material-symbols-outlined text-sm">star_half</span>
-                </div>
-                <span className="text-xs text-gray-400">4.8 (120+ รีวิว)</span>
-              </div>
             </div>
-            {b.isActive && (
+            {b.isActive ? (
               <div className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                 <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">เปิดให้บริการ</span>
+              </div>
+            ) : (
+              <div className="bg-gray-500/10 px-3 py-1 rounded-full border border-gray-500/20">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">ปิดทำการ</span>
               </div>
             )}
           </div>
@@ -111,9 +129,12 @@ export default function BranchDetailPage({ branch, onBack, onOpenGeoMap }: Branc
               โทรออก
             </a>
           )}
-          <button onClick={onBack} className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-2xl shadow-[0_4px_20px_rgba(242,13,13,0.4)] active:scale-95 transition-transform">
-            <span className="material-symbols-outlined">calendar_today</span>
-            จองบริการ
+          <button
+            onClick={openGoogleMaps}
+            className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-2xl shadow-[0_4px_20px_rgba(242,13,13,0.4)] active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined">directions</span>
+            นำทาง
           </button>
         </div>
       </main>

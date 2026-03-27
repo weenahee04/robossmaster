@@ -54,7 +54,11 @@ export const api = {
 
   // Vehicles
   getVehicles: (customerId: string) => apiFetch(`/vehicles?customerId=${customerId}`),
-  addVehicle: (data: { customerId: string; make: string; model?: string; licensePlate: string }) =>
+  addVehicle: (data: { customerId: string; make: string; model?: string; color?: string; year?: string; licensePlate: string; isPrimary?: boolean }) =>
     apiFetch('/vehicles', { method: 'POST', body: JSON.stringify(data) }),
+  updateVehicle: (data: { id: string; make?: string; model?: string; color?: string; year?: string; licensePlate?: string; isPrimary?: boolean }) =>
+    apiFetch('/vehicles', { method: 'PATCH', body: JSON.stringify(data) }),
+  setPrimaryVehicle: (id: string) =>
+    apiFetch('/vehicles', { method: 'PATCH', body: JSON.stringify({ id, isPrimary: true }) }),
   deleteVehicle: (id: string) => apiFetch(`/vehicles?id=${id}`, { method: 'DELETE' }),
 };

@@ -19,7 +19,7 @@ export default function BottomNav({ activeTab, setActiveTab, onScan }: BottomNav
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface-dark/95 backdrop-blur-lg border-t border-white/5 pb-6 pt-2 px-6 flex justify-between items-center z-50">
       {tabs.map((tab) =>
         tab.key === 'scan' ? (
-          <div key="scan" className="relative -top-6">
+          <div key="scan" className="relative -top-6" data-tour-id="tour-nav-scan">
             <button
               onClick={onScan}
               className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(242,13,13,0.5)] hover:scale-105 active:scale-95 transition-all border-4 border-surface-dark"
@@ -31,6 +31,7 @@ export default function BottomNav({ activeTab, setActiveTab, onScan }: BottomNav
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
+            data-tour-id={`tour-nav-${tab.key}`}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === tab.key ? 'text-primary' : 'text-gray-500 hover:text-gray-300'}`}
           >
             <span className={`material-symbols-outlined ${activeTab === tab.key ? 'fill-1' : ''}`}>{tab.icon}</span>
