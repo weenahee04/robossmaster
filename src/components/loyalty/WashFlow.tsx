@@ -160,7 +160,7 @@ export default function WashFlow({ user, branchSlug, branchName, availableCoupon
   const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
   const [remainingSec, setRemainingSec] = useState(0);
   const [totalSec, setTotalSec] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const [activeCardIdx, setActiveCardIdx] = useState(0);
   const [selectedSizeIdx, setSelectedSizeIdx] = useState<number | null>(null);

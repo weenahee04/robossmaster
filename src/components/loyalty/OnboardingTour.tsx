@@ -45,7 +45,7 @@ export default function OnboardingTour({ onComplete, onSkip }: OnboardingTourPro
   const [currentStep, setCurrentStep] = useState(0);
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
   const [tooltipPos, setTooltipPos] = useState<'top' | 'bottom'>('bottom');
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number>(undefined);
 
   const step = TOUR_STEPS[currentStep];
 
