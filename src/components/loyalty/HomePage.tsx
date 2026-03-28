@@ -72,7 +72,7 @@ export default function HomePage({ user, banners, config, branchName, vehicles, 
   const touchStartX = useRef(0);
   const touchDeltaX = useRef(0);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
+  const autoPlayRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const goToSlide = useCallback((idx: number) => {
     setCurrentSlide(idx);
